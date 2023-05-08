@@ -14,7 +14,7 @@ export class RustIterator<T> implements Iterator<T> {
     return this;
   }
 
-  done: boolean = false;
+  done = false;
 
   next() {
     const next = this.upstream.next();
@@ -42,6 +42,7 @@ export class RustIterator<T> implements Iterator<T> {
 
   last(): T | undefined {
     let last;
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const { value, done } = this.next();
       if (done) return last;
