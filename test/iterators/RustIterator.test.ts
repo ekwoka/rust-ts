@@ -94,4 +94,20 @@ describe('Iterator methods', () => {
       expect([...iter]).toEqual([1, 4, 7]);
     });
   });
+  describe('.chain', () => {
+    it('chains two iterables', () => {
+      const iter = new RustIterator([1, 2, 3]).chain([4, 5, 6]);
+      expect([...iter]).toEqual([1, 2, 3, 4, 5, 6]);
+    });
+  });
+  describe('.zip', () => {
+    it('zips two iterables', () => {
+      const iter = new RustIterator([1, 2, 3]).zip([4, 5, 6]);
+      expect([...iter]).toEqual([
+        [1, 4],
+        [2, 5],
+        [3, 6],
+      ]);
+    });
+  });
 });

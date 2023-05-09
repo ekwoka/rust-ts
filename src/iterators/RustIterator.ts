@@ -1,7 +1,9 @@
+import { chain } from './chain';
 import { filter } from './filter';
 import { map } from './map';
 import { stepBy } from './stepBy';
 import { take } from './take';
+import { zip } from './zip';
 
 export class RustIterator<T> implements Iterator<T> {
   private upstream: Iterator<T>;
@@ -77,5 +79,11 @@ export class RustIterator<T> implements Iterator<T> {
 
   stepBy(n: number): RustIterator<T> {
     return new RustIterator(stepBy(this, n));
+  }
+  chain(other: Iterable<T>): RustIterator<T> {
+    return new RustIterator(chain(this, other));
+  }
+  zip(other: Iterable<T>): RustIterator<[T, T]> {
+    return new RustIterator(zip(this, other));
   }
 }
