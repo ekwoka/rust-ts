@@ -1,4 +1,4 @@
-import { RustIterator } from "./RustIterator";
+import { RustIterator } from './RustIterator';
 
 export function* rangeGen(start = 0, end = Infinity, step = 1) {
   for (let i = start; i <= end; i += step) yield i;
@@ -12,4 +12,5 @@ export const r = ([str]: TemplateStringsArray) => {
   return range(+(start || 0), +(end || Infinity) - (inclusive ? 0 : 1));
 };
 
-export const range = (start = 0, end = Infinity, step = 1) => new RustIterator(rangeGen(start, end, step));
+export const range = (start = 0, end = Infinity, step = 1) =>
+  new RustIterator(rangeGen(start, end, step));
