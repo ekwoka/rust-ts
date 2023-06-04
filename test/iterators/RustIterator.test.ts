@@ -123,4 +123,14 @@ describe('Iterator methods', () => {
       expect(values).toBe('abc');
     });
   });
+  describe('.enumerate', () => {
+    it('enumerates an iterable', () => {
+      const iter = new RustIterator(['a', 'b', 'c']).enumerate();
+      expect([...iter]).toEqual([
+        [0, 'a'],
+        [1, 'b'],
+        [2, 'c'],
+      ]);
+    });
+  });
 });

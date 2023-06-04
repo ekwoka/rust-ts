@@ -1,4 +1,5 @@
 import { chain } from './chain';
+import { enumerate } from './enumerate';
 import { filter } from './filter';
 import { forEach } from './forEach';
 import { map } from './map';
@@ -92,5 +93,9 @@ export class RustIterator<T> implements Iterator<T> {
 
   zip(other: Iterable<T>): RustIterator<[T, T]> {
     return new RustIterator(zip(this, other));
+  }
+
+  enumerate(): RustIterator<[number, T]> {
+    return new RustIterator(enumerate(this));
   }
 }
