@@ -110,4 +110,17 @@ describe('Iterator methods', () => {
       ]);
     });
   });
+  describe('.forEach', () => {
+    it('calls a closure for each element in the iterable', () => {
+      let count = 0;
+      let values = '';
+      const closure = (val: string) => {
+        count++;
+        values += val;
+      };
+      new RustIterator(['a', 'b', 'c']).forEach(closure);
+      expect(count).toBe(3);
+      expect(values).toBe('abc');
+    });
+  });
 });

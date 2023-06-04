@@ -1,5 +1,6 @@
 import { chain } from './chain';
 import { filter } from './filter';
+import { forEach } from './forEach';
 import { map } from './map';
 import { stepBy } from './stepBy';
 import { take } from './take';
@@ -73,6 +74,10 @@ export class RustIterator<T> implements Iterator<T> {
     return new RustIterator(filter(this, f));
   }
 
+  forEach(f: (val: T) => void): void {
+    forEach(this, f);
+  }
+
   take(n: number): RustIterator<T> {
     return new RustIterator(take(this, n));
   }
@@ -80,9 +85,11 @@ export class RustIterator<T> implements Iterator<T> {
   stepBy(n: number): RustIterator<T> {
     return new RustIterator(stepBy(this, n));
   }
+
   chain(other: Iterable<T>): RustIterator<T> {
     return new RustIterator(chain(this, other));
   }
+
   zip(other: Iterable<T>): RustIterator<[T, T]> {
     return new RustIterator(zip(this, other));
   }
