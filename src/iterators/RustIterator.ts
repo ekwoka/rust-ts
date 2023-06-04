@@ -2,6 +2,7 @@ import { chain } from './chain';
 import { enumerate } from './enumerate';
 import { filter } from './filter';
 import { forEach } from './forEach';
+import { inspect } from './inspect';
 import { map } from './map';
 import { stepBy } from './stepBy';
 import { take } from './take';
@@ -97,5 +98,9 @@ export class RustIterator<T> implements Iterator<T> {
 
   enumerate(): RustIterator<[number, T]> {
     return new RustIterator(enumerate(this));
+  }
+
+  inspect(fn: (val: T) => void): RustIterator<T> {
+    return new RustIterator(inspect(this, fn));
   }
 }

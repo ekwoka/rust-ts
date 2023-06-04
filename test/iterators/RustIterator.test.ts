@@ -133,4 +133,13 @@ describe('Iterator methods', () => {
       ]);
     });
   });
+  describe('.inspect', () => {
+    it('lazily inspects an iterable as a passthrough', () => {
+      let count = 0;
+      const iter = new RustIterator(['a', 'b', 'c']).inspect(() => count++);
+      expect(count).toBe(0);
+      expect([...iter]).toEqual(['a', 'b', 'c']);
+      expect(count).toBe(3);
+    });
+  });
 });
