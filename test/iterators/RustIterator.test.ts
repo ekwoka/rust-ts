@@ -11,7 +11,7 @@ describe('RustIterator', () => {
   });
 });
 
-describe('state methods', () => {
+describe('properties', () => {
   it('.done', () => {
     const iter = new RustIterator([1, 2, 3]);
     iter.next();
@@ -61,55 +61,6 @@ describe('consumption methods', () => {
     expect(iter.nth(2)).toEqual(6);
     expect(iter.nth(3)).toEqual(undefined);
   });
-});
-
-describe('Iterator methods', () => {
-  describe('.collect', () => {
-    it('collects into an array', () => {
-      const iter = new RustIterator([1, 2, 3]);
-      expect(iter.collect()).toEqual([1, 2, 3]);
-    });
-  });
-  describe('.map', () => {
-    it('maps to a new iterator', () => {
-      const iter = new RustIterator([1, 2, 3]).map((x) => x * 2);
-      expect([...iter]).toEqual([2, 4, 6]);
-    });
-  });
-  describe('.filter', () => {
-    it('filters to a new iterator', () => {
-      const iter = new RustIterator([1, 2, 3]).filter((x) => x % 2 === 0);
-      expect([...iter]).toEqual([2]);
-    });
-  });
-  describe('.take', () => {
-    it('takes from an iterator', () => {
-      const iter = new RustIterator([1, 2, 3]).take(2);
-      expect([...iter]).toEqual([1, 2]);
-    });
-  });
-  describe('.stepBy', () => {
-    it('steps over an iterator', () => {
-      const iter = new RustIterator([1, 2, 3, 4, 5, 6, 7, 8]).stepBy(3);
-      expect([...iter]).toEqual([1, 4, 7]);
-    });
-  });
-  describe('.chain', () => {
-    it('chains two iterables', () => {
-      const iter = new RustIterator([1, 2, 3]).chain([4, 5, 6]);
-      expect([...iter]).toEqual([1, 2, 3, 4, 5, 6]);
-    });
-  });
-  describe('.zip', () => {
-    it('zips two iterables', () => {
-      const iter = new RustIterator([1, 2, 3]).zip([4, 5, 6]);
-      expect([...iter]).toEqual([
-        [1, 4],
-        [2, 5],
-        [3, 6],
-      ]);
-    });
-  });
   describe('.forEach', () => {
     it('calls a closure for each element in the iterable', () => {
       let count = 0;
@@ -121,25 +72,6 @@ describe('Iterator methods', () => {
       new RustIterator(['a', 'b', 'c']).forEach(closure);
       expect(count).toBe(3);
       expect(values).toBe('abc');
-    });
-  });
-  describe('.enumerate', () => {
-    it('enumerates an iterable', () => {
-      const iter = new RustIterator(['a', 'b', 'c']).enumerate();
-      expect([...iter]).toEqual([
-        [0, 'a'],
-        [1, 'b'],
-        [2, 'c'],
-      ]);
-    });
-  });
-  describe('.inspect', () => {
-    it('lazily inspects an iterable as a passthrough', () => {
-      let count = 0;
-      const iter = new RustIterator(['a', 'b', 'c']).inspect(() => count++);
-      expect(count).toBe(0);
-      expect([...iter]).toEqual(['a', 'b', 'c']);
-      expect(count).toBe(3);
     });
   });
   describe('.fold/.reduce', () => {
@@ -212,6 +144,74 @@ describe('Iterator methods', () => {
     it('works on strings', () => {
       expect(new RustIterator(['c', 'a', 'b']).max()).toBe('c');
       expect(new RustIterator(['c', 'a', 'b']).min()).toBe('a');
+    });
+  });
+});
+
+describe('Iterator methods', () => {
+  describe('.collect', () => {
+    it('collects into an array', () => {
+      const iter = new RustIterator([1, 2, 3]);
+      expect(iter.collect()).toEqual([1, 2, 3]);
+    });
+  });
+  describe('.map', () => {
+    it('maps to a new iterator', () => {
+      const iter = new RustIterator([1, 2, 3]).map((x) => x * 2);
+      expect([...iter]).toEqual([2, 4, 6]);
+    });
+  });
+  describe('.filter', () => {
+    it('filters to a new iterator', () => {
+      const iter = new RustIterator([1, 2, 3]).filter((x) => x % 2 === 0);
+      expect([...iter]).toEqual([2]);
+    });
+  });
+  describe('.take', () => {
+    it('takes from an iterator', () => {
+      const iter = new RustIterator([1, 2, 3]).take(2);
+      expect([...iter]).toEqual([1, 2]);
+    });
+  });
+  describe('.stepBy', () => {
+    it('steps over an iterator', () => {
+      const iter = new RustIterator([1, 2, 3, 4, 5, 6, 7, 8]).stepBy(3);
+      expect([...iter]).toEqual([1, 4, 7]);
+    });
+  });
+  describe('.chain', () => {
+    it('chains two iterables', () => {
+      const iter = new RustIterator([1, 2, 3]).chain([4, 5, 6]);
+      expect([...iter]).toEqual([1, 2, 3, 4, 5, 6]);
+    });
+  });
+  describe('.zip', () => {
+    it('zips two iterables', () => {
+      const iter = new RustIterator([1, 2, 3]).zip([4, 5, 6]);
+      expect([...iter]).toEqual([
+        [1, 4],
+        [2, 5],
+        [3, 6],
+      ]);
+    });
+  });
+  describe('.enumerate', () => {
+    it('enumerates an iterable', () => {
+      const iter = new RustIterator(['a', 'b', 'c']).enumerate();
+      expect([...iter]).toEqual([
+        [0, 'a'],
+        [1, 'b'],
+        [2, 'c'],
+      ]);
+    });
+  });
+  describe('.inspect', () => {
+    it('lazily inspects an iterable as a passthrough', () => {
+      let count = 0;
+      const iter = new RustIterator(['a', 'b', 'c']).inspect(() => count++);
+      expect(count).toBe(0);
+      expect([...iter]).toEqual(['a', 'b', 'c']);
+      expect(count).toBe(3);
     });
   });
 });
