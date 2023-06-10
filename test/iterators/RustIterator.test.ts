@@ -1,4 +1,4 @@
-import { RustIterator } from '../../src/iterators/RustIterator';
+import { PeekableRustIterator, RustIterator } from '@/iterators/RustIterator';
 
 describe('RustIterator', () => {
   it('wraps an iterable', () => {
@@ -149,9 +149,9 @@ describe('Iterator methods', () => {
       ).fold((acc, [key, val]) => ((acc[key] = val), acc), {} as any);
       expect(folded).toEqual({ a: 1, b: 2, c: 3 });
       const reduced = new RustIterator(
-        Object.entries({ a: 1, b: 2, c: 3 })
-      ).reduce((acc, [key, val]) => ((acc[key] = val), acc), {} as any);
-      expect(reduced).toEqual({ a: 1, b: 2, c: 3 });
+        new Set(Object.values({ a: 1, b: 2, c: 3 }))
+      ).reduce((acc, item) => acc * item, 1);
+      expect(reduced).toEqual(6);
     });
     it('uses first element as the initial value', () => {
       const foldedsum = new RustIterator([1, 2, 3]).fold((acc, x) => acc + x);
@@ -187,6 +187,7 @@ describe('Iterator methods', () => {
       expect(strings.any((x) => typeof x === 'number')).toBe(false);
       expect(mixed.any((x) => typeof x === 'number')).toBe(true);
       expect(mixed.any((x) => typeof x === 'string')).toBe(true);
+      expect(new RustIterator([]).any(Boolean)).toBe(false);
     });
     it('checks if all elements in an iterable match a predicate', () => {
       const numbers = new RustIterator([1, 2, 3, 4, 5]);
@@ -194,6 +195,53 @@ describe('Iterator methods', () => {
       expect(numbers.all((x) => typeof x === 'number')).toBe(true);
       expect(mixed.all((x) => typeof x === 'number')).toBe(false);
       expect(mixed.all((x) => typeof x === 'string')).toBe(false);
+      expect(new RustIterator([]).all(Boolean)).toBe(true);
+    });
+  });
+  describe('.max/.min', () => {
+    it('finds the max of an iterable', () => {
+      const iter = new RustIterator([3, 4, 1, 5, 2]);
+      expect(iter.max()).toBe(5);
+      expect(new RustIterator([]).max()).toBe(undefined);
+    });
+    it('finds the min of an iterable', () => {
+      const iter = new RustIterator([3, 4, 1, 5, 2]);
+      expect(iter.min()).toBe(1);
+      expect(new RustIterator([]).min()).toBe(undefined);
+    });
+    it('works on strings', () => {
+      expect(new RustIterator(['c', 'a', 'b']).max()).toBe('c');
+      expect(new RustIterator(['c', 'a', 'b']).min()).toBe('a');
+    });
+  });
+});
+
+describe('PeekableRustIterator', () => {
+  describe('.peekable', () => {
+    it('returns a new PeekableRustIterator from RustIterator', () => {
+      const iter = new RustIterator([1, 2, 3]).peekable();
+      expect(iter).toBeInstanceOf(PeekableRustIterator);
+    });
+    it('returns self from PeekableRustIterator', () => {
+      const iter = new PeekableRustIterator([1, 2, 3]);
+      expect(iter.peekable()).toBe(iter);
+    });
+  });
+  describe('.peek', () => {
+    it('allows peeking', () => {
+      const iter = new PeekableRustIterator([1, 2, 3]);
+      expect(iter.peek()).toEqual({ value: 1, done: false });
+      expect(iter.peek()).toEqual({ value: 1, done: false });
+      expect(iter.next()).toEqual({ value: 1, done: false });
+      expect(iter.peek()).toEqual({ value: 2, done: false });
+      expect(iter.peek()).toEqual({ value: 2, done: false });
+      expect(iter.next()).toEqual({ value: 2, done: false });
+      expect(iter.peek()).toEqual({ value: 3, done: false });
+      expect(iter.peek()).toEqual({ value: 3, done: false });
+      expect(iter.next()).toEqual({ value: 3, done: false });
+      expect(iter.peek()).toEqual({ value: undefined, done: true });
+      expect(iter.peek()).toEqual({ value: undefined, done: true });
+      expect(iter.next()).toEqual({ value: undefined, done: true });
     });
   });
 });

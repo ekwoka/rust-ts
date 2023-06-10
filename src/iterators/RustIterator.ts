@@ -27,6 +27,10 @@ export class RustIterator<T> implements Iterator<T> {
     return next;
   }
 
+  peekable(): PeekableRustIterator<T> {
+    return new PeekableRustIterator(this);
+  }
+
   nextChunk(n: number): { value: T[]; done: boolean } {
     const chunk = [];
     for (let i = 0; i < n; i++) {
@@ -110,7 +114,7 @@ export class RustIterator<T> implements Iterator<T> {
     return acc;
   }
 
-  reduce<A = T>(fn: (acc: A, item: T) => A, initial?: A): A {
+  reduce(fn: (acc: T, item: T) => T, initial?: T): T {
     return this.fold(fn, initial);
   }
 
@@ -130,5 +134,32 @@ export class RustIterator<T> implements Iterator<T> {
   find(checker: (item: T) => unknown): T | null {
     for (const item of this) if (checker(item)) return item;
     return null;
+  }
+
+  max(): T | undefined {
+    return this.reduce((acc, item) => (item > acc ? item : acc));
+  }
+
+  min(): T | undefined {
+    return this.reduce((acc, item) => (item < acc ? item : acc));
+  }
+}
+
+export class PeekableRustIterator<T> extends RustIterator<T> {
+  peeked: IteratorResult<T> | undefined;
+  peek(): IteratorResult<T> {
+    if (!this.peeked) this.peeked = this.next();
+    return this.peeked;
+  }
+  next() {
+    if (this.peeked) {
+      const peeked = this.peeked;
+      this.peeked = undefined;
+      return peeked;
+    }
+    return super.next();
+  }
+  peekable(): PeekableRustIterator<T> {
+    return this;
   }
 }
