@@ -103,4 +103,19 @@ export class RustIterator<T> implements Iterator<T> {
   inspect(fn: (val: T) => void): RustIterator<T> {
     return new RustIterator(inspect(this, fn));
   }
+
+  fold<A = T>(fn: (acc: A, item: T) => A, initial?: A): A {
+    let acc = initial ?? this.next().value;
+    for (const item of this) acc = fn(acc, item);
+    return acc;
+  }
+
+  reduce<A = T>(fn: (acc: A, item: T) => A, initial?: A): A {
+    return this.fold(fn, initial);
+  }
+
+  sum() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.reduce((acc: any, item: any) => acc + item);
+  }
 }

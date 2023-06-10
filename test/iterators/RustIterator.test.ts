@@ -142,4 +142,34 @@ describe('Iterator methods', () => {
       expect(count).toBe(3);
     });
   });
+  describe('.fold/.reduce', () => {
+    it('reduces iterable into a single value', () => {
+      const folded = new RustIterator(
+        Object.entries({ a: 1, b: 2, c: 3 })
+      ).fold((acc, [key, val]) => ((acc[key] = val), acc), {} as any);
+      expect(folded).toEqual({ a: 1, b: 2, c: 3 });
+      const reduced = new RustIterator(
+        Object.entries({ a: 1, b: 2, c: 3 })
+      ).reduce((acc, [key, val]) => ((acc[key] = val), acc), {} as any);
+      expect(reduced).toEqual({ a: 1, b: 2, c: 3 });
+    });
+    it('uses first element as the initial value', () => {
+      const foldedsum = new RustIterator([1, 2, 3]).fold((acc, x) => acc + x);
+      expect(foldedsum).toBe(6);
+      const reducedsum = new RustIterator([1, 2, 3]).reduce(
+        (acc, x) => acc + x
+      );
+      expect(reducedsum).toBe(6);
+    });
+  });
+  describe('.sum', () => {
+    it('sums iterable of numbers', () => {
+      const iter = new RustIterator([1, 2, 3]);
+      expect(iter.sum()).toBe(6);
+    });
+    it('concatenates iterable of strings', () => {
+      const iter = new RustIterator(['a', 'b', 'c']);
+      expect(iter.sum()).toBe('abc');
+    });
+  });
 });
