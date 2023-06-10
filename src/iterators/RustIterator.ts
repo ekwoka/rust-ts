@@ -118,4 +118,17 @@ export class RustIterator<T> implements Iterator<T> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.reduce((acc: any, item: any) => acc + item);
   }
+
+  all(checker: (item: T) => unknown): boolean {
+    return !this.any((item) => !checker(item));
+  }
+
+  any(checker: (item: T) => unknown): boolean {
+    return this.find(checker) !== null;
+  }
+
+  find(checker: (item: T) => unknown): T | null {
+    for (const item of this) if (checker(item)) return item;
+    return null;
+  }
 }

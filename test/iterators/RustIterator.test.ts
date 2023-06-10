@@ -172,4 +172,28 @@ describe('Iterator methods', () => {
       expect(iter.sum()).toBe('abc');
     });
   });
+  describe('.find/.any/.all', () => {
+    it('find an element in an iterable', () => {
+      const iter = new RustIterator([1, 2, 3, 4, 5]);
+      expect(iter.find((x) => !(x % 2))).toBe(2);
+      expect(iter.find((x) => x % 2)).toBe(3);
+      expect(iter.find((x) => typeof x === 'string')).toBe(null);
+    });
+    it('checks if any element in an iterable matches a predicate', () => {
+      const numbers = new RustIterator([1, 2, 3, 4, 5]);
+      const strings = new RustIterator(['a', 'b', 'c']);
+      const mixed = new RustIterator([1, 'a', 2, 'b', 3, 'c']);
+      expect(numbers.any((x) => typeof x === 'number')).toBe(true);
+      expect(strings.any((x) => typeof x === 'number')).toBe(false);
+      expect(mixed.any((x) => typeof x === 'number')).toBe(true);
+      expect(mixed.any((x) => typeof x === 'string')).toBe(true);
+    });
+    it('checks if all elements in an iterable match a predicate', () => {
+      const numbers = new RustIterator([1, 2, 3, 4, 5]);
+      const mixed = new RustIterator([1, 'a', 2, 'b', 3, 'c']);
+      expect(numbers.all((x) => typeof x === 'number')).toBe(true);
+      expect(mixed.all((x) => typeof x === 'number')).toBe(false);
+      expect(mixed.all((x) => typeof x === 'string')).toBe(false);
+    });
+  });
 });
