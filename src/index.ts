@@ -2,6 +2,7 @@ export {
   RustIterator,
   PeekableRustIterator,
   filter,
+  flat,
   map,
   scan,
   stepBy,

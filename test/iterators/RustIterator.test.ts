@@ -223,6 +223,17 @@ describe('Iterator methods', () => {
       expect([...iter]).toEqual([2, 4, 64]);
     });
   });
+  describe('.flat', () => {
+    it('returns an iterator over flattened values', () => {
+      expect([...new RustIterator([1, [2, 3], [4, [5, 6]]]).flat()]).toEqual([
+        1,
+        2,
+        3,
+        4,
+        [5, 6],
+      ]);
+    });
+  });
 });
 
 describe('PeekableRustIterator', () => {

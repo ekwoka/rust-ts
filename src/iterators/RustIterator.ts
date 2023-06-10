@@ -1,6 +1,7 @@
 import { chain } from './chain';
 import { enumerate } from './enumerate';
 import { filter } from './filter';
+import { flat } from './flat';
 import { forEach } from './forEach';
 import { inspect } from './inspect';
 import { map } from './map';
@@ -111,6 +112,10 @@ export class RustIterator<T> implements Iterator<T> {
 
   scan<A = T>(fn: (acc: A, val: T) => A, initial: A): RustIterator<A> {
     return new RustIterator(scan(this, fn, initial));
+  }
+
+  flat() {
+    return new RustIterator(flat(this));
   }
 
   fold<A = T>(fn: (acc: A, item: T) => A, initial?: A): A {

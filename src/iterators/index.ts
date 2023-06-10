@@ -2,6 +2,7 @@ import { RustIterator } from './RustIterator';
 
 export { enumerate } from './enumerate';
 export { filter } from './filter';
+export { flat } from './flat';
 export { forEach } from './forEach';
 export { inspect } from './inspect';
 export { map } from './map';
