@@ -4,6 +4,7 @@ import { filter } from './filter';
 import { forEach } from './forEach';
 import { inspect } from './inspect';
 import { map } from './map';
+import { scan } from './scan';
 import { stepBy } from './stepBy';
 import { take } from './take';
 import { zip } from './zip';
@@ -106,6 +107,10 @@ export class RustIterator<T> implements Iterator<T> {
 
   inspect(fn: (val: T) => void): RustIterator<T> {
     return new RustIterator(inspect(this, fn));
+  }
+
+  scan<A = T>(fn: (acc: A, val: T) => A, initial: A): RustIterator<A> {
+    return new RustIterator(scan(this, fn, initial));
   }
 
   fold<A = T>(fn: (acc: A, item: T) => A, initial?: A): A {

@@ -214,6 +214,15 @@ describe('Iterator methods', () => {
       expect(count).toBe(3);
     });
   });
+  describe('.scan', () => {
+    it('returns an iterator that maintains an internal state to fold values', () => {
+      const iter = new RustIterator([1, 2, 3]).scan(
+        (acc, item) => acc ** item,
+        2
+      );
+      expect([...iter]).toEqual([2, 4, 64]);
+    });
+  });
 });
 
 describe('PeekableRustIterator', () => {
