@@ -1,9 +1,11 @@
 import { chain } from './chain';
 import { enumerate } from './enumerate';
 import { filter } from './filter';
+import { flat } from './flat';
 import { forEach } from './forEach';
 import { inspect } from './inspect';
 import { map } from './map';
+import { scan } from './scan';
 import { stepBy } from './stepBy';
 import { take } from './take';
 import { zip } from './zip';
@@ -25,6 +27,10 @@ export class RustIterator<T> implements Iterator<T> {
     const next = this.upstream.next();
     this.done = next.done ?? false;
     return next;
+  }
+
+  peekable(): PeekableRustIterator<T> {
+    return new PeekableRustIterator(this);
   }
 
   nextChunk(n: number): { value: T[]; done: boolean } {
@@ -102,5 +108,68 @@ export class RustIterator<T> implements Iterator<T> {
 
   inspect(fn: (val: T) => void): RustIterator<T> {
     return new RustIterator(inspect(this, fn));
+  }
+
+  scan<A = T>(fn: (acc: A, val: T) => A, initial: A): RustIterator<A> {
+    return new RustIterator(scan(this, fn, initial));
+  }
+
+  flat() {
+    return new RustIterator(flat(this));
+  }
+
+  fold<A = T>(fn: (acc: A, item: T) => A, initial?: A): A {
+    let acc = initial ?? this.next().value;
+    for (const item of this) acc = fn(acc, item);
+    return acc;
+  }
+
+  reduce(fn: (acc: T, item: T) => T, initial?: T): T {
+    return this.fold(fn, initial);
+  }
+
+  sum() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.reduce((acc: any, item: any) => acc + item);
+  }
+
+  all(checker: (item: T) => unknown): boolean {
+    return !this.any((item) => !checker(item));
+  }
+
+  any(checker: (item: T) => unknown): boolean {
+    return this.find(checker) !== null;
+  }
+
+  find(checker: (item: T) => unknown): T | null {
+    for (const item of this) if (checker(item)) return item;
+    return null;
+  }
+
+  max(): T | undefined {
+    return this.reduce((acc, item) => (item > acc ? item : acc));
+  }
+
+  min(): T | undefined {
+    return this.reduce((acc, item) => (item < acc ? item : acc));
+  }
+}
+
+export class PeekableRustIterator<T> extends RustIterator<T> {
+  peeked: IteratorResult<T> | undefined;
+  peek(): IteratorResult<T> {
+    if (!this.peeked) this.peeked = this.next();
+    return this.peeked;
+  }
+  next() {
+    if (this.peeked) {
+      const peeked = this.peeked;
+      this.peeked = undefined;
+      return peeked;
+    }
+    return super.next();
+  }
+  peekable(): PeekableRustIterator<T> {
+    return this;
   }
 }
