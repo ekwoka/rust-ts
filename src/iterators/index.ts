@@ -9,6 +9,7 @@ export { map } from './map';
 export { r, range } from './range';
 export { RustIterator, PeekableRustIterator } from './RustIterator';
 export { scan } from './scan';
+export { sort } from './sort';
 export { stepBy } from './stepBy';
 export { take } from './take';
 export { zip } from './zip';

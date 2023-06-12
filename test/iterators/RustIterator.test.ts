@@ -236,6 +236,19 @@ describe('Iterator methods', () => {
   });
 });
 
+describe('Special Methods', () => {
+  describe('.sort', () => {
+    it('returns a sorted iterator', () => {
+      const iter = new RustIterator([3, 2, 1]).sort();
+      expect([...iter]).toEqual([1, 2, 3]);
+    });
+    it('accepts a comparison function', () => {
+      const iter = new RustIterator([3, 2, 1]).sort((a, b) => b - a);
+      expect([...iter]).toEqual([3, 2, 1]);
+    });
+  });
+});
+
 describe('PeekableRustIterator', () => {
   describe('.peekable', () => {
     it('returns a new PeekableRustIterator from RustIterator', () => {

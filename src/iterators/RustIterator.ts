@@ -6,6 +6,7 @@ import { forEach } from './forEach';
 import { inspect } from './inspect';
 import { map } from './map';
 import { scan } from './scan';
+import { sort } from './sort';
 import { stepBy } from './stepBy';
 import { take } from './take';
 import { zip } from './zip';
@@ -152,6 +153,10 @@ export class RustIterator<T> implements Iterator<T> {
 
   min(): T | undefined {
     return this.reduce((acc, item) => (item < acc ? item : acc));
+  }
+
+  sort(compare?: (a: T, b: T) => number) {
+    return new RustIterator(sort(this, compare));
   }
 }
 
