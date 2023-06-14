@@ -1,17 +1,56 @@
 const ok = Symbol();
 const err = Symbol();
 
-export type OK<T> = { [ok]: true; value: T };
-export type ERR<E> = { [err]: true; error: E };
+export interface Result<T, E> {
+  isOk(): boolean;
+  isErr(): boolean;
+  unwrap(): T;
+  unwrapOr(defaultValue: T): T;
+  unwrapErr(): E;
+}
 
-export type Result<T, E> = OK<T> | ERR<E>;
+export class Ok<T> implements Result<T, never> {
+  ok = ok;
+  constructor(public value: T) {}
+  isOk(): boolean {
+    return true;
+  }
+  isErr(): boolean {
+    return false;
+  }
+  unwrap(): T {
+    return this.value;
+  }
+  unwrapOr(_default: T): T {
+    return this.value;
+  }
+  unwrapErr(): never {
+    throw new Error('called `Result.unwrapErr()` on an `Ok` value');
+  }
+}
 
-export const Ok = <T>(value: T): OK<T> => ({ [ok]: true, value });
+export class Err<E> implements Result<never, E> {
+  err = err;
+  constructor(public error: E) {}
+  isOk(): boolean {
+    return false;
+  }
+  isErr(): boolean {
+    return true;
+  }
+  unwrap(): never {
+    throw this.error;
+  }
+  unwrapOr<T>(or: T): T {
+    return or;
+  }
+  unwrapErr(): E {
+    return this.error;
+  }
+}
 
-export const Err = <E>(error: E): ERR<E> => ({ [err]: true, error });
+export const isOk = <T, E>(result: Result<T, E>): result is Ok<T> =>
+  result.isOk();
 
-export const isOk = <T, E>(result: Result<T, E>): result is OK<T> =>
-  ok in result;
-
-export const isErr = <T, E>(result: Result<T, E>): result is ERR<E> =>
-  err in result;
+export const isErr = <T, E>(result: Result<T, E>): result is Err<E> =>
+  result.isErr();

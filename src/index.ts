@@ -13,4 +13,4 @@ export {
 } from './iterators';
 
 export { Ok, Err, isOk, isErr } from './result';
-export type { OK, ERR, Result } from './result';
+export type { Result } from './result';
