@@ -1,2 +1,2 @@
-export { Ok, Err, isOk, isErr } from './Result.js';
-export type { Result } from './Result.js';
+export { Ok, Err, isOk, isErr } from './Result';
+export type { Result } from './Result';
