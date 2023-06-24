@@ -1,2 +1,2 @@
-export { Ok, Err, isOk, isErr } from './result';
-export type { OK, ERR, Result } from './result';
+export { Ok, Err, isOk, isErr } from './Result';
+export type { Result } from './Result';
