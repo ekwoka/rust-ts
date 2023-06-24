@@ -4,11 +4,12 @@ export {
   filter,
   flat,
   map,
+  r,
+  range,
   scan,
   stepBy,
   take,
-  r,
-  range,
+  window,
   zip,
 } from './iterators';
 
