@@ -146,6 +146,14 @@ describe('consumption methods', () => {
       expect(new RustIterator(['c', 'a', 'b']).min()).toBe('a');
     });
   });
+  describe('.position/.findIndex', () => {
+    it('finds the position of a matching element', () => {
+      const iter = new RustIterator([1, 2, 3, 4, 5]);
+      expect(iter.position((x) => x === 3)).toBe(2);
+      expect(iter.findIndex((x) => x === 5)).toBe(1);
+      expect(iter.position((x) => x === 6)).toBe(null);
+    });
+  });
 });
 
 describe('Iterator methods', () => {

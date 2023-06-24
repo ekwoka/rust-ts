@@ -158,6 +158,18 @@ export class RustIterator<T> implements Iterator<T> {
   sort(compare?: (a: T, b: T) => number) {
     return new RustIterator(sort(this, compare));
   }
+
+  position(checker: (item: T) => boolean): number | null {
+    let i = 0;
+    for (const item of this) {
+      if (checker(item)) return i;
+      i++;
+    }
+    return null;
+  }
+  findIndex(checker: (item: T) => boolean): number | null {
+    return this.position(checker);
+  }
 }
 
 export class PeekableRustIterator<T> extends RustIterator<T> {
