@@ -12,5 +12,6 @@ export { scan } from './scan';
 export { sort } from './sort';
 export { stepBy } from './stepBy';
 export { take } from './take';
+export { window } from './window';
 export { zip } from './zip';
 export default RustIterator;
