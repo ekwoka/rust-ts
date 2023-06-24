@@ -33,6 +33,12 @@ describe('consumption methods', () => {
     expect(iter.next()).toEqual({ value: 3, done: false });
     expect(iter.next()).toEqual({ value: undefined, done: true });
   });
+  describe('.collect', () => {
+    it('collects into an array', () => {
+      const iter = new RustIterator([1, 2, 3]);
+      expect(iter.collect()).toEqual([1, 2, 3]);
+    });
+  });
   it('.nextChunk', () => {
     const iter = new RustIterator([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(iter.nextChunk(2)).toEqual({ value: [1, 2], done: false });
@@ -146,15 +152,17 @@ describe('consumption methods', () => {
       expect(new RustIterator(['c', 'a', 'b']).min()).toBe('a');
     });
   });
+  describe('.position/.findIndex', () => {
+    it('finds the position of a matching element', () => {
+      const iter = new RustIterator([1, 2, 3, 4, 5]);
+      expect(iter.position((x) => x === 3)).toBe(2);
+      expect(iter.findIndex((x) => x === 5)).toBe(1);
+      expect(iter.position((x) => x === 6)).toBe(null);
+    });
+  });
 });
 
 describe('Iterator methods', () => {
-  describe('.collect', () => {
-    it('collects into an array', () => {
-      const iter = new RustIterator([1, 2, 3]);
-      expect(iter.collect()).toEqual([1, 2, 3]);
-    });
-  });
   describe('.map', () => {
     it('maps to a new iterator', () => {
       const iter = new RustIterator([1, 2, 3]).map((x) => x * 2);
@@ -231,6 +239,15 @@ describe('Iterator methods', () => {
         3,
         4,
         [5, 6],
+      ]);
+    });
+  });
+  describe('.window', () => {
+    it('returns an iterator over windows of size n', () => {
+      expect([...new RustIterator([1, 2, 3, 4, 5]).window(3)]).toEqual([
+        [1, 2, 3],
+        [2, 3, 4],
+        [3, 4, 5],
       ]);
     });
   });

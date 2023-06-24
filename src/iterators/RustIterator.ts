@@ -9,6 +9,7 @@ import { scan } from './scan';
 import { sort } from './sort';
 import { stepBy } from './stepBy';
 import { take } from './take';
+import { window } from './window';
 import { zip } from './zip';
 
 export class RustIterator<T> implements Iterator<T> {
@@ -119,6 +120,10 @@ export class RustIterator<T> implements Iterator<T> {
     return new RustIterator(flat(this));
   }
 
+  window(n: number): RustIterator<T[]> {
+    return new RustIterator(window(this, n));
+  }
+
   fold<A = T>(fn: (acc: A, item: T) => A, initial?: A): A {
     let acc = initial ?? this.next().value;
     for (const item of this) acc = fn(acc, item);
@@ -157,6 +162,18 @@ export class RustIterator<T> implements Iterator<T> {
 
   sort(compare?: (a: T, b: T) => number) {
     return new RustIterator(sort(this, compare));
+  }
+
+  position(checker: (item: T) => boolean): number | null {
+    let i = 0;
+    for (const item of this) {
+      if (checker(item)) return i;
+      i++;
+    }
+    return null;
+  }
+  findIndex(checker: (item: T) => boolean): number | null {
+    return this.position(checker);
   }
 }
 
