@@ -1,4 +1,4 @@
-import { Err, Ok, isErr, isOk } from '@/result/Result';
+import { Err, Ok, Result, isErr, isOk } from '@/result/Result';
 
 describe('Result', () => {
   it('should be able to create an Ok result', () => {
@@ -38,5 +38,20 @@ describe('Result', () => {
     );
     const err = new Err(new Error('42'));
     expect(err.unwrapErr()).toEqual(new Error('42'));
+  });
+  it('can unwrapOr use default', () => {
+    expect(new Ok(42).unwrapOr(69)).toEqual(42);
+    expect(new Err(42).unwrapOr(69)).toEqual(69);
+  });
+  it('can chain andThen', () => {
+    let result: Result<number, number> = new Ok(42);
+    result = result.andThen((value) => new Ok(value + 1));
+    expect(result.unwrap()).toEqual(43);
+    result = result.andThen((value) => new Err(value + 1));
+    expect(result.unwrapErr()).toEqual(44);
+    result = result.andThen((value) => new Ok(value + 1));
+    expect(result.unwrapErr()).toEqual(44);
+    result = result.andThen((value) => new Err(value + 1));
+    expect(result.unwrapErr()).toEqual(44);
   });
 });

@@ -7,6 +7,7 @@ export interface Result<T, E> {
   unwrap(): T;
   unwrapOr(defaultValue: T): T;
   unwrapErr(): E;
+  andThen<U>(op?: (value: T) => U): U | Err<E>;
 }
 
 export class Ok<T> implements Result<T, never> {
@@ -27,6 +28,9 @@ export class Ok<T> implements Result<T, never> {
   unwrapErr(): never {
     throw new Error('called `Result.unwrapErr()` on an `Ok` value');
   }
+  andThen<U>(op: (value: T) => U): U {
+    return op(this.value);
+  }
 }
 
 export class Err<E> implements Result<never, E> {
@@ -46,6 +50,9 @@ export class Err<E> implements Result<never, E> {
   }
   unwrapErr(): E {
     return this.error;
+  }
+  andThen(): Err<E> {
+    return this;
   }
 }
 
