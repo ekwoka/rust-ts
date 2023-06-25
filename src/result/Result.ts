@@ -16,6 +16,9 @@ export interface Result<T, E> {
   mapErr<U>(op: (error: E) => U): Result<T, U>;
   mapOr<U>(op: (value: T) => U, defaultValue: U): U;
   mapOrElse<U>(op: (value: T) => U, opErr: (error: E) => U): U;
+
+  inspect(inspector: (value: T) => void): Result<T, E>;
+  inspectErr(inspector: (error: E) => void): Result<T, E>;
 }
 
 export class Ok<T> implements Result<T, never> {
@@ -55,6 +58,14 @@ export class Ok<T> implements Result<T, never> {
   mapOrElse<U>(op: (value: T) => U, _opErr: (error: never) => U): U {
     return op(this.value);
   }
+
+  inspect(inspector: (value: T) => void): Ok<T> {
+    inspector(this.value);
+    return this;
+  }
+  inspectErr(): Ok<T> {
+    return this;
+  }
 }
 
 export class Err<E> implements Result<never, E> {
@@ -93,6 +104,14 @@ export class Err<E> implements Result<never, E> {
   }
   mapOrElse<U>(_op: (value: never) => U, opErr: (error: E) => U): U {
     return opErr(this.error);
+  }
+
+  inspect(_inspector: (value: never) => void): Err<E> {
+    return this;
+  }
+  inspectErr(inspector: (error: E) => void): Err<E> {
+    inspector(this.error);
+    return this;
   }
 }
 

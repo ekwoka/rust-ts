@@ -101,4 +101,27 @@ describe('Result', () => {
       ).toEqual(41);
     });
   });
+
+  describe('special methods', () => {
+    it('inspects the Ok value', () => {
+      const closure = vi.fn();
+      const okie = new Ok(42);
+      okie.inspect(closure);
+      expect(closure).toHaveBeenCalledOnce();
+      expect(closure).toHaveBeenCalledWith(42);
+      const err = new Err(42);
+      err.inspect(closure);
+      expect(closure).toHaveBeenCalledOnce();
+    });
+    it('inspects the Err value', () => {
+      const closure = vi.fn();
+      const okie: Result<number, number> = new Ok(42);
+      okie.inspectErr(closure);
+      expect(closure).toHaveBeenCalledTimes(0);
+      const err: Result<number, number> = new Err(42);
+      err.inspectErr(closure);
+      expect(closure).toHaveBeenCalledOnce();
+      expect(closure).toHaveBeenCalledWith(42);
+    });
+  });
 });
