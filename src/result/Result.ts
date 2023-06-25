@@ -8,6 +8,7 @@ export interface Result<T, E> {
   unwrapOr(defaultValue: T): T;
   unwrapErr(): E;
   andThen<U>(op?: (value: T) => U): U | Err<E>;
+  orElse<U>(op?: (error: E) => U): U | Ok<T>;
 }
 
 export class Ok<T> implements Result<T, never> {
@@ -31,6 +32,9 @@ export class Ok<T> implements Result<T, never> {
   andThen<U>(op: (value: T) => U): U {
     return op(this.value);
   }
+  orElse(): Ok<T> {
+    return this;
+  }
 }
 
 export class Err<E> implements Result<never, E> {
@@ -53,6 +57,9 @@ export class Err<E> implements Result<never, E> {
   }
   andThen(): Err<E> {
     return this;
+  }
+  orElse<U>(op: (error: E) => U): U {
+    return op(this.error);
   }
 }
 
