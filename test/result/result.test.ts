@@ -44,6 +44,13 @@ describe('Result', () => {
       expect(new Ok(42).unwrapOr(69)).toEqual(42);
       expect(new Err(42).unwrapOr(69)).toEqual(69);
     });
+
+    it('can indicate why result is epected to be Ok', () => {
+      expect(new Ok(42).expect('value is hardcoded')).toEqual(42);
+      expect(() => new Err(42).expect('value is hardcoded')).toThrow(
+        /value is hardcoded/
+      );
+    });
   });
   describe('control flow', () => {
     it('can chain andThen', () => {

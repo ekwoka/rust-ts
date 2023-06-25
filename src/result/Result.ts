@@ -8,6 +8,7 @@ export interface Result<T, E> {
   unwrap(): T;
   unwrapOr(defaultValue: T): T;
   unwrapErr(): E;
+  expect(message: string): T;
 
   andThen<U>(op?: (value: T) => U): U | Err<E>;
   orElse<U>(op?: (error: E) => U): U | Ok<T>;
@@ -39,6 +40,10 @@ export class Ok<T> implements Result<T, never> {
   unwrapErr(): never {
     throw new Error('called `Result.unwrapErr()` on an `Ok` value');
   }
+  expect(_msg: string): T {
+    return this.value;
+  }
+
   andThen<U>(op: (value: T) => U): U {
     return op(this.value);
   }
@@ -86,6 +91,12 @@ export class Err<E> implements Result<never, E> {
   unwrapErr(): E {
     return this.error;
   }
+  expect(msg: string): never {
+    throw new Error(
+      `Error unwrapping Err value: ${this.error}. Expected ${msg}`
+    );
+  }
+
   andThen(): Err<E> {
     return this;
   }
