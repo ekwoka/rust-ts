@@ -4,11 +4,18 @@ const err = Symbol();
 export interface Result<T, E> {
   isOk(): boolean;
   isErr(): boolean;
+
   unwrap(): T;
   unwrapOr(defaultValue: T): T;
   unwrapErr(): E;
+
   andThen<U>(op?: (value: T) => U): U | Err<E>;
   orElse<U>(op?: (error: E) => U): U | Ok<T>;
+
+  map<U>(op: (value: T) => U): Result<U, E>;
+  mapErr<U>(op: (error: E) => U): Result<T, U>;
+  mapOr<U>(op: (value: T) => U, defaultValue: U): U;
+  mapOrElse<U>(op: (value: T) => U, opErr: (error: E) => U): U;
 }
 
 export class Ok<T> implements Result<T, never> {
@@ -35,6 +42,19 @@ export class Ok<T> implements Result<T, never> {
   orElse(): Ok<T> {
     return this;
   }
+
+  map<U>(op: (value: T) => U): Ok<U> {
+    return new Ok(op(this.value));
+  }
+  mapErr(): Ok<T> {
+    return this;
+  }
+  mapOr<U>(op: (value: T) => U, _defaultValue: U): U {
+    return op(this.value);
+  }
+  mapOrElse<U>(op: (value: T) => U, _opErr: (error: never) => U): U {
+    return op(this.value);
+  }
 }
 
 export class Err<E> implements Result<never, E> {
@@ -60,6 +80,19 @@ export class Err<E> implements Result<never, E> {
   }
   orElse<U>(op: (error: E) => U): U {
     return op(this.error);
+  }
+
+  map(): Err<E> {
+    return this;
+  }
+  mapErr<U>(op: (error: E) => U): Err<U> {
+    return new Err(op(this.error));
+  }
+  mapOr<U>(_op: (value: never) => U, defaultValue: U): U {
+    return defaultValue;
+  }
+  mapOrElse<U>(_op: (value: never) => U, opErr: (error: E) => U): U {
+    return opErr(this.error);
   }
 }
 

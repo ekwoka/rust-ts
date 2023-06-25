@@ -65,4 +65,40 @@ describe('Result', () => {
       expect(result.unwrap()).toEqual(43);
     });
   });
+  describe('map', () => {
+    it('can map Ok', () => {
+      const okie: Result<number, number> = new Ok(42);
+      expect(okie.map((value) => value + 1).unwrap()).toEqual(43);
+      const error: Result<number, number> = new Err(42);
+      expect(error.map((value) => value + 1).unwrapErr()).toEqual(42);
+    });
+    it('can mapErr', () => {
+      const okie: Result<number, number> = new Ok(42);
+      expect(okie.mapErr((value) => value + 1).unwrap()).toEqual(42);
+      const error: Result<number, number> = new Err(42);
+      expect(error.mapErr((value) => value + 1).unwrapErr()).toEqual(43);
+    });
+    it('can mapOr', () => {
+      const okie = new Ok(42);
+      expect(okie.mapOr((value) => value + 1, 69)).toEqual(43);
+      const error = new Err(42);
+      expect(error.mapOr((value) => value + 1, 69)).toEqual(69);
+    });
+    it('can mapOrElse', () => {
+      const okie = new Ok(42);
+      expect(
+        okie.mapOrElse(
+          (value) => value + 1,
+          (value) => value - 1
+        )
+      ).toEqual(43);
+      const error = new Err(42);
+      expect(
+        error.mapOrElse(
+          (value) => value + 1,
+          (value) => value - 1
+        )
+      ).toEqual(41);
+    });
+  });
 });
