@@ -13,5 +13,5 @@ export {
   zip,
 } from './iterators';
 
-export { Ok, Err, isOk, isErr } from './result';
+export { Ok, Err, isOk, isErr, Try } from './result';
 export type { Result } from './result';
