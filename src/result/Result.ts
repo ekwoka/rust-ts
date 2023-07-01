@@ -146,3 +146,13 @@ export const Try = <T, E = Error>(op: () => T): Result<T, E> => {
     return new Err(e as E);
   }
 };
+
+export const TryAsync = async <T, E = Error>(
+  op: () => Promise<T>
+): Promise<Result<T, E>> => {
+  try {
+    return new Ok((await op()) as T);
+  } catch (e) {
+    return new Err(e as E);
+  }
+};

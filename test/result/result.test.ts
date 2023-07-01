@@ -1,4 +1,4 @@
-import { Err, Ok, Result, Try, isErr, isOk } from '@/result/Result';
+import { Err, Ok, Result, Try, TryAsync, isErr, isOk } from '@/result/Result';
 
 describe('Result', () => {
   it('should be able to create an Ok result', () => {
@@ -30,6 +30,12 @@ describe('Result', () => {
     expect(Try(() => JSON.parse('{a: 1}')).unwrapErr()).toBeInstanceOf(
       SyntaxError
     );
+  });
+  it('can Try an async operation', async () => {
+    expect(await TryAsync(() => Promise.resolve(42))).toEqual(new Ok(42));
+    expect(
+      (await TryAsync(() => Promise.reject(JSON.parse('{a: 1}')))).unwrapErr()
+    ).toBeInstanceOf(SyntaxError);
   });
   describe('unwrap', () => {
     it('can unwrap an Ok result or throw Err', () => {
