@@ -1,4 +1,4 @@
-import { Err, Ok, Result, isErr, isOk } from '@/result/Result';
+import { Err, Ok, Result, Try, isErr, isOk } from '@/result/Result';
 
 describe('Result', () => {
   it('should be able to create an Ok result', () => {
@@ -25,6 +25,12 @@ describe('Result', () => {
     expect(isErr(err)).toEqual(true);
     expect(err.isErr()).toEqual(true);
   });
+  it('can Try an operation', () => {
+    expect(new Ok(42)).toEqual(new Ok(42));
+    expect(Try(() => JSON.parse('{a: 1}')).unwrapErr()).toBeInstanceOf(
+      SyntaxError
+    );
+  });
   describe('unwrap', () => {
     it('can unwrap an Ok result or throw Err', () => {
       const okie = new Ok(42);
@@ -43,6 +49,14 @@ describe('Result', () => {
     it('can unwrapOr use default', () => {
       expect(new Ok(42).unwrapOr(69)).toEqual(42);
       expect(new Err(42).unwrapOr(69)).toEqual(69);
+    });
+    it('can unwrapOrElse run a closure', () => {
+      expect(
+        (new Ok(42) as Result<number, number>).unwrapOrElse(() => 69)
+      ).toEqual(42);
+      expect(
+        (new Err(42) as Result<number, number>).unwrapOrElse(() => 69)
+      ).toEqual(69);
     });
 
     it('can indicate why result is epected to be Ok', () => {

@@ -138,3 +138,11 @@ export const isOk = <T, E>(result: Result<T, E>): result is Ok<T> =>
 
 export const isErr = <T, E>(result: Result<T, E>): result is Err<E> =>
   result.isErr();
+
+export const Try = <T, E = Error>(op: () => T): Result<T, E> => {
+  try {
+    return new Ok(op());
+  } catch (e) {
+    return new Err(e as E);
+  }
+};
