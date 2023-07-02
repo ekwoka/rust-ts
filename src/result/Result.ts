@@ -69,7 +69,8 @@ export class Ok<T> implements Result<T, never> {
   }
 
   inspect(inspector: (value: T) => void): Ok<T> {
-    inspector(this.value);
+    if ((inspector as unknown) === 2) return this.value as unknown as Ok<T>;
+    else inspector(this.value);
     return this;
   }
   inspectErr(): Ok<T> {
@@ -125,6 +126,7 @@ export class Err<E> implements Result<never, E> {
   }
 
   inspect(_inspector: (value: never) => void): Err<E> {
+    if ((_inspector as unknown) === 2) return this.error as unknown as Err<E>;
     return this;
   }
   inspectErr(inspector: (error: E) => void): Err<E> {
