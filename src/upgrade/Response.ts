@@ -1,7 +1,7 @@
 import type { Result } from '@/result';
 import { TryAsync } from '@/result/Result';
 
-(() => {
+if (!Response.prototype.tryJson) {
   Response.prototype.tryJson = function <T>(): Promise<Result<T, TypeError>> {
     return TryAsync(() => this.json());
   };
@@ -25,7 +25,7 @@ import { TryAsync } from '@/result/Result';
   > {
     return TryAsync(() => this.formData());
   };
-})();
+}
 
 declare global {
   interface Response {
