@@ -27,15 +27,19 @@ describe('Result', () => {
   });
   it('can Try an operation', () => {
     expect(new Ok(42)).toEqual(new Ok(42));
-    expect(Try(() => JSON.parse('{a: 1}')).unwrapErr()).toBeInstanceOf(
-      SyntaxError
+    expect(Try(() => JSON.parse('{a: 1}'))).toEqual(
+      new Err(
+        new SyntaxError("Expected property name or '}' in JSON at position 1")
+      )
     );
   });
   it('can Try an async operation', async () => {
     expect(await TryAsync(() => Promise.resolve(42))).toEqual(new Ok(42));
-    expect(
-      (await TryAsync(() => Promise.reject(JSON.parse('{a: 1}')))).unwrapErr()
-    ).toBeInstanceOf(SyntaxError);
+    expect(await TryAsync(() => Promise.reject(JSON.parse('{a: 1}')))).toEqual(
+      new Err(
+        new SyntaxError("Expected property name or '}' in JSON at position 1")
+      )
+    );
   });
   describe('unwrap', () => {
     it('can unwrap an Ok result or throw Err', () => {
@@ -76,34 +80,34 @@ describe('Result', () => {
     it('can chain andThen', () => {
       let result: Result<number, number> = new Ok(42);
       result = result.andThen((value) => new Ok(value + 1));
-      expect(result.unwrap()).toEqual(43);
+      expect(result).toEqual(new Ok(43));
       result = result.andThen((value) => new Err(value + 1));
-      expect(result.unwrapErr()).toEqual(44);
+      expect(result).toEqual(new Err(44));
       result = result.andThen((value) => new Ok(value + 1));
-      expect(result.unwrapErr()).toEqual(44);
+      expect(result).toEqual(new Err(44));
       result = result.andThen((value) => new Err(value + 1));
-      expect(result.unwrapErr()).toEqual(44);
+      expect(result).toEqual(new Err(44));
     });
     it('can chain orElse', () => {
       let result: Result<number, number> = new Err(42);
       result = result.orElse((value) => new Ok(value + 1));
-      expect(result.unwrap()).toEqual(43);
+      expect(result).toEqual(new Ok(43));
       result = result.orElse((value) => new Err(value + 1));
-      expect(result.unwrap()).toEqual(43);
+      expect(result).toEqual(new Ok(43));
     });
   });
   describe('map', () => {
     it('can map Ok', () => {
       const okie: Result<number, number> = new Ok(42);
-      expect(okie.map((value) => value + 1).unwrap()).toEqual(43);
+      expect(okie.map((value) => value + 1)).toEqual(new Ok(43));
       const error: Result<number, number> = new Err(42);
-      expect(error.map((value) => value + 1).unwrapErr()).toEqual(42);
+      expect(error.map((value) => value + 1)).toEqual(new Err(42));
     });
     it('can mapErr', () => {
       const okie: Result<number, number> = new Ok(42);
-      expect(okie.mapErr((value) => value + 1).unwrap()).toEqual(42);
+      expect(okie.mapErr((value) => value + 1)).toEqual(new Ok(42));
       const error: Result<number, number> = new Err(42);
-      expect(error.mapErr((value) => value + 1).unwrapErr()).toEqual(43);
+      expect(error.mapErr((value) => value + 1)).toEqual(new Err(43));
     });
     it('can mapOr', () => {
       const okie = new Ok(42);
