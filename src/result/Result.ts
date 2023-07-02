@@ -7,6 +7,7 @@ export interface Result<T, E> {
 
   unwrap(): T;
   unwrapOr(defaultValue: T): T;
+  unwrapOrElse(op: (error: E) => T): T;
   unwrapErr(): E;
   expect(message: string): T;
 
@@ -35,6 +36,9 @@ export class Ok<T> implements Result<T, never> {
     return this.value;
   }
   unwrapOr(_default: T): T {
+    return this.value;
+  }
+  unwrapOrElse(_op: never): T {
     return this.value;
   }
   unwrapErr(): never {
@@ -88,6 +92,9 @@ export class Err<E> implements Result<never, E> {
   unwrapOr<T>(or: T): T {
     return or;
   }
+  unwrapOrElse<T>(op: (error: E) => T): T {
+    return op(this.error);
+  }
   unwrapErr(): E {
     return this.error;
   }
@@ -131,3 +138,21 @@ export const isOk = <T, E>(result: Result<T, E>): result is Ok<T> =>
 
 export const isErr = <T, E>(result: Result<T, E>): result is Err<E> =>
   result.isErr();
+
+export const Try = <T, E = Error>(op: () => T): Result<T, E> => {
+  try {
+    return new Ok(op());
+  } catch (e) {
+    return new Err(e as E);
+  }
+};
+
+export const TryAsync = async <T, E = Error>(
+  op: () => Promise<T>
+): Promise<Result<T, E>> => {
+  try {
+    return new Ok((await op()) as T);
+  } catch (e) {
+    return new Err(e as E);
+  }
+};
