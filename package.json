@@ -1,8 +1,7 @@
 {
-  "name": "create-kwoka-pkg",
+  "name": "@ekwoka/rust-ts",
   "version": "0.0.1",
   "description": "",
-  "private": true,
   "exports": {
     ".": {
       "import": "./dist/index.js",
