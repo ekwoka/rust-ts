@@ -1,4 +1,4 @@
-import { RustIterator } from './RustIterator';
+import { RustIterator } from './RustIterator.js';
 
 export function* rangeGen(start = 0, end = Infinity, step = 1) {
   for (let i = start; i <= end; i += step) yield i;

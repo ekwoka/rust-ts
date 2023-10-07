@@ -83,11 +83,11 @@ describe('consumption methods', () => {
   describe('.fold/.reduce', () => {
     it('reduces iterable into a single value', () => {
       const folded = new RustIterator(
-        Object.entries({ a: 1, b: 2, c: 3 })
+        Object.entries({ a: 1, b: 2, c: 3 }),
       ).fold((acc, [key, val]) => ((acc[key] = val), acc), {} as any);
       expect(folded).toEqual({ a: 1, b: 2, c: 3 });
       const reduced = new RustIterator(
-        new Set(Object.values({ a: 1, b: 2, c: 3 }))
+        new Set(Object.values({ a: 1, b: 2, c: 3 })),
       ).reduce((acc, item) => acc * item, 1);
       expect(reduced).toEqual(6);
     });
@@ -95,7 +95,7 @@ describe('consumption methods', () => {
       const foldedsum = new RustIterator([1, 2, 3]).fold((acc, x) => acc + x);
       expect(foldedsum).toBe(6);
       const reducedsum = new RustIterator([1, 2, 3]).reduce(
-        (acc, x) => acc + x
+        (acc, x) => acc + x,
       );
       expect(reducedsum).toBe(6);
     });
@@ -226,7 +226,7 @@ describe('Iterator methods', () => {
     it('returns an iterator that maintains an internal state to fold values', () => {
       const iter = new RustIterator([1, 2, 3]).scan(
         (acc, item) => acc ** item,
-        2
+        2,
       );
       expect([...iter]).toEqual([2, 4, 64]);
     });

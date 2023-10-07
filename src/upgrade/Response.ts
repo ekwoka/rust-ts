@@ -1,5 +1,4 @@
-import type { Result } from '@/result';
-import { TryAsync } from '@/result/Result';
+import { type Result, TryAsync } from '../result/Result.js';
 
 if (!Response.prototype.tryJson) {
   Response.prototype.tryJson = function <T>(): Promise<Result<T, TypeError>> {

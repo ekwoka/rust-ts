@@ -2,7 +2,7 @@ const lexographicalCompare = <T>(a: T, b: T) => (a > b ? 1 : a < b ? -1 : 0);
 
 export function* sort<T>(
   iter: Iterable<T>,
-  compare: (a: T, b: T) => number = lexographicalCompare
+  compare: (a: T, b: T) => number = lexographicalCompare,
 ) {
   let next = 0;
   const collection: T[] = [...iter];

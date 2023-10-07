@@ -1,4 +1,4 @@
-import { Result, Try } from '@/result/Result';
+import { type Result, Try } from '../result/Result.js';
 
 if (!JSON.tryParse) {
   JSON.tryParse = (json) => Try(() => JSON.parse(json));

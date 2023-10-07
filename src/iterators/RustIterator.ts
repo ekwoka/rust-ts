@@ -1,16 +1,16 @@
-import { chain } from './chain';
-import { enumerate } from './enumerate';
-import { filter } from './filter';
-import { flat } from './flat';
-import { forEach } from './forEach';
-import { inspect } from './inspect';
-import { map } from './map';
-import { scan } from './scan';
-import { sort } from './sort';
-import { stepBy } from './stepBy';
-import { take } from './take';
-import { window } from './window';
-import { zip } from './zip';
+import { chain } from './chain.js';
+import { enumerate } from './enumerate.js';
+import { filter } from './filter.js';
+import { flat } from './flat.js';
+import { forEach } from './forEach.js';
+import { inspect } from './inspect.js';
+import { map } from './map.js';
+import { scan } from './scan.js';
+import { sort } from './sort.js';
+import { stepBy } from './stepBy.js';
+import { take } from './take.js';
+import { window } from './window.js';
+import { zip } from './zip.js';
 
 export class RustIterator<T> implements Iterator<T> {
   private upstream: Iterator<T>;

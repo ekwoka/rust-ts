@@ -11,7 +11,7 @@ export {
   take,
   window,
   zip,
-} from './iterators';
+} from './iterators/index.js';
 
-export { Ok, Err, isOk, isErr, Try, TryAsync } from './result';
-export type { Result } from './result';
+export { Ok, Err, isOk, isErr, Try, TryAsync } from './result/index.js';
+export type { Result } from './result/index.js';

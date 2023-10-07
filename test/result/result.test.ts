@@ -29,16 +29,16 @@ describe('Result', () => {
     expect(new Ok(42)).toEqual(new Ok(42));
     expect(Try(() => JSON.parse('{a: 1}'))).toEqual(
       new Err(
-        new SyntaxError("Expected property name or '}' in JSON at position 1")
-      )
+        new SyntaxError("Expected property name or '}' in JSON at position 1"),
+      ),
     );
   });
   it('can Try an async operation', async () => {
     expect(await TryAsync(() => Promise.resolve(42))).toEqual(new Ok(42));
     expect(await TryAsync(() => Promise.reject(JSON.parse('{a: 1}')))).toEqual(
       new Err(
-        new SyntaxError("Expected property name or '}' in JSON at position 1")
-      )
+        new SyntaxError("Expected property name or '}' in JSON at position 1"),
+      ),
     );
   });
   describe('unwrap', () => {
@@ -51,7 +51,7 @@ describe('Result', () => {
     it('can unwrap an Err result', () => {
       const okie = new Ok(42);
       expect(() => okie.unwrapErr()).toThrow(
-        new Error('called `Result.unwrapErr()` on an `Ok` value')
+        new Error('called `Result.unwrapErr()` on an `Ok` value'),
       );
       const err = new Err(new Error('42'));
       expect(err.unwrapErr()).toEqual(new Error('42'));
@@ -62,17 +62,17 @@ describe('Result', () => {
     });
     it('can unwrapOrElse run a closure', () => {
       expect(
-        (new Ok(42) as Result<number, number>).unwrapOrElse(() => 69)
+        (new Ok(42) as Result<number, number>).unwrapOrElse(() => 69),
       ).toEqual(42);
       expect(
-        (new Err(42) as Result<number, number>).unwrapOrElse(() => 69)
+        (new Err(42) as Result<number, number>).unwrapOrElse(() => 69),
       ).toEqual(69);
     });
 
     it('can indicate why result is epected to be Ok', () => {
       expect(new Ok(42).expect('value is hardcoded')).toEqual(42);
       expect(() => new Err(42).expect('value is hardcoded')).toThrow(
-        /value is hardcoded/
+        /value is hardcoded/,
       );
     });
   });
@@ -120,15 +120,15 @@ describe('Result', () => {
       expect(
         okie.mapOrElse(
           (value) => value + 1,
-          (value) => value - 1
-        )
+          (value) => value - 1,
+        ),
       ).toEqual(43);
       const error = new Err(42);
       expect(
         error.mapOrElse(
           (value) => value + 1,
-          (value) => value - 1
-        )
+          (value) => value - 1,
+        ),
       ).toEqual(41);
     });
   });

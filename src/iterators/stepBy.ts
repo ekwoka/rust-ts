@@ -1,4 +1,4 @@
-import { RustIterator } from './RustIterator';
+import { RustIterator } from './RustIterator.js';
 
 export function* stepBy<T>(iter: Iterable<T>, n: number) {
   const rIter = new RustIterator(iter);

@@ -101,7 +101,7 @@ export class Err<E> implements Result<never, E> {
   }
   expect(msg: string): never {
     throw new Error(
-      `Error unwrapping Err value: ${this.error}. Expected ${msg}`
+      `Error unwrapping Err value: ${this.error}. Expected ${msg}`,
     );
   }
 
@@ -150,7 +150,7 @@ export const Try = <T, E = Error>(op: () => T): Result<T, E> => {
 };
 
 export const TryAsync = async <T, E = Error>(
-  op: () => Promise<T>
+  op: () => Promise<T>,
 ): Promise<Result<T, E>> => {
   try {
     return new Ok((await op()) as T);
