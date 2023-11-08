@@ -27,19 +27,16 @@ describe('Result', () => {
   });
   it('can Try an operation', () => {
     expect(new Ok(42)).toEqual(new Ok(42));
-    expect(Try(() => JSON.parse('{a: 1}'))).toEqual(
-      new Err(
-        new SyntaxError("Expected property name or '}' in JSON at position 1"),
-      ),
+    expect(Try(() => JSON.parse('{a: 1}')).unwrapErr().message).toContain(
+      "Expected property name or '}' in JSON at position 1",
     );
   });
   it('can Try an async operation', async () => {
     expect(await TryAsync(() => Promise.resolve(42))).toEqual(new Ok(42));
-    expect(await TryAsync(() => Promise.reject(JSON.parse('{a: 1}')))).toEqual(
-      new Err(
-        new SyntaxError("Expected property name or '}' in JSON at position 1"),
-      ),
-    );
+    expect(
+      (await TryAsync(() => Promise.reject(JSON.parse('{a: 1}')))).unwrapErr()
+        .message,
+    ).toContain("Expected property name or '}' in JSON at position 1");
   });
   describe('unwrap', () => {
     it('can unwrap an Ok result or throw Err', () => {

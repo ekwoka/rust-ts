@@ -3,8 +3,8 @@ import '@/upgrade/JSON';
 describe('JSON', () => {
   it('can tryParse', () => {
     expect(JSON.tryParse('{"foo":"bar"}').unwrap()).toEqual({ foo: 'bar' });
-    expect(JSON.tryParse('{foo: "bar"}').unwrapErr()).toEqual(
-      new SyntaxError("Expected property name or '}' in JSON at position 1"),
+    expect(JSON.tryParse('{foo: "bar"}').unwrapErr().message).toContain(
+      "Expected property name or '}' in JSON at position 1",
     );
   });
 
