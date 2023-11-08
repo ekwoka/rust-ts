@@ -2,8 +2,8 @@ const ok = Symbol();
 const err = Symbol();
 
 export interface Result<T, E> {
-  isOk(): boolean;
-  isErr(): boolean;
+  isOk(): this is Ok<T>;
+  isErr(): this is Err<E>;
 
   unwrap(): T;
   unwrapOr(defaultValue: T): T;
@@ -25,11 +25,14 @@ export interface Result<T, E> {
 
 export class Ok<T> implements Result<T, never> {
   ok = ok;
-  constructor(public value: T) {}
-  isOk(): boolean {
+  value: T;
+  constructor(value?: T) {
+    this.value = value as T;
+  }
+  isOk(): this is Ok<T> {
     return true;
   }
-  isErr(): boolean {
+  isErr(): this is Err<never> {
     return false;
   }
   unwrap(): T {
@@ -80,11 +83,14 @@ export class Ok<T> implements Result<T, never> {
 
 export class Err<E> implements Result<never, E> {
   err = err;
-  constructor(public error: E) {}
-  isOk(): boolean {
+  error: E;
+  constructor(error?: E) {
+    this.error = error as E;
+  }
+  isOk(): this is Ok<never> {
     return false;
   }
-  isErr(): boolean {
+  isErr(): this is Err<E> {
     return true;
   }
   unwrap(): never {

@@ -1,1 +1,2 @@
+import './JSON';
 import './Response';

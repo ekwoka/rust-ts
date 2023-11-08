@@ -15,3 +15,4 @@ export {
 
 export { Ok, Err, isOk, isErr, Try, TryAsync } from './result/index.js';
 export type { Result } from './result/index.js';
+export { tryFetch } from './tryFetch.js';
