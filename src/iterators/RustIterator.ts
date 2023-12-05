@@ -112,7 +112,7 @@ export class RustIterator<T> implements Iterator<T> {
     return new RustIterator(inspect(this, fn));
   }
 
-  scan<A = T>(fn: (acc: A, val: T) => A, initial: A): RustIterator<A> {
+  scan<A = T, R = T>(fn: (acc: [A], val: T) => R, initial: A): RustIterator<R> {
     return new RustIterator(scan(this, fn, initial));
   }
 

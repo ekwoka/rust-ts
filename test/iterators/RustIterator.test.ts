@@ -225,7 +225,7 @@ describe('Iterator methods', () => {
   describe('.scan', () => {
     it('returns an iterator that maintains an internal state to fold values', () => {
       const iter = new RustIterator([1, 2, 3]).scan(
-        (acc, item) => acc ** item,
+        (acc, item) => (acc[0] = acc[0] ** item),
         2,
       );
       expect([...iter]).toEqual([2, 4, 64]);
