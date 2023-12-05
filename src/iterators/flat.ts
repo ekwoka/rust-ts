@@ -11,6 +11,17 @@ export function* flat<T, D extends number = 1>(
   }
 }
 
+export function* flatMap<T, S = T>(
+  iter: Iterable<T>,
+  mapper: (val: T) => S,
+): Generator<Flatten<S, 1>, void, undefined> {
+  for (const item of iter) {
+    const mapped = mapper(item);
+    if (isIterable(mapped)) yield* mapped as Iterable<Flatten<S, 1>>;
+    else yield mapped as Flatten<S, 1>;
+  }
+}
+
 const isIterable = <T>(val: Iterable<T> | unknown): val is Iterable<T> => {
   return typeof val === 'object' && val !== null && Symbol.iterator in val;
 };

@@ -247,6 +247,16 @@ describe('Iterator methods', () => {
       ]);
     });
   });
+  describe('.flatMap', () => {
+    it('returns an iterator that maps over an iterable and flattens the returned values', () => {
+      expect([
+        ...new RustIterator(['hello', 'world']).flatMap((val) =>
+          val.split('l'),
+        ),
+      ]).toEqual(['he', '', 'o', 'wor', 'd']);
+    });
+  });
+
   describe('.window', () => {
     it('returns an iterator over windows of size n', () => {
       expect([...new RustIterator([1, 2, 3, 4, 5]).window(3)]).toEqual([

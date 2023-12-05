@@ -1,5 +1,5 @@
 import { RustIterator } from '@/iterators/RustIterator';
-import { flat } from '@/iterators/flat';
+import { flat, flatMap } from '@/iterators/flat';
 
 describe('flat', () => {
   it('returns an iterator over flattened values', () => {
@@ -15,5 +15,13 @@ describe('flat', () => {
         2,
       ),
     ]).toEqual([1, 2, [3, 4], 5, [6]]);
+  });
+});
+describe('flatMap', () => {
+  it('returns an iterator that maps over an iterable and flattens the returned values', () => {
+    expect([...flatMap(['hello', ['world']], (val) => val)]).toEqual([
+      'hello',
+      'world',
+    ]);
   });
 });

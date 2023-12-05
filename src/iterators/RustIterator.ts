@@ -1,7 +1,7 @@
 import { chain } from './chain.js';
 import { enumerate } from './enumerate.js';
 import { filter } from './filter.js';
-import { flat } from './flat.js';
+import { flat, flatMap } from './flat.js';
 import { forEach } from './forEach.js';
 import { inspect } from './inspect.js';
 import { map } from './map.js';
@@ -118,6 +118,9 @@ export class RustIterator<T> implements IterableIterator<T> {
 
   flat<D extends number = 1>(depth?: D) {
     return new RustIterator(flat<T, D>(this, depth));
+  }
+  flatMap<S>(mapper: (val: T) => S) {
+    return new RustIterator(flatMap(this, mapper));
   }
 
   window(n: number): RustIterator<T[]> {
