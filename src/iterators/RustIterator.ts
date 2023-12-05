@@ -116,8 +116,8 @@ export class RustIterator<T> implements Iterator<T> {
     return new RustIterator(scan(this, fn, initial));
   }
 
-  flat() {
-    return new RustIterator(flat(this));
+  flat<D extends number = 1>(depth?: D) {
+    return new RustIterator(flat<T, D>(this, depth));
   }
 
   window(n: number): RustIterator<T[]> {

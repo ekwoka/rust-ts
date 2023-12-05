@@ -241,6 +241,11 @@ describe('Iterator methods', () => {
         [5, 6],
       ]);
     });
+    it('allows flattening a specific depth', () => {
+      expect([...new RustIterator([1, [2, 3], [4, [5, 6]]]).flat(2)]).toEqual([
+        1, 2, 3, 4, 5, 6,
+      ]);
+    });
   });
   describe('.window', () => {
     it('returns an iterator over windows of size n', () => {
