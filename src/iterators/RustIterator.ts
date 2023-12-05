@@ -12,7 +12,7 @@ import { take } from './take.js';
 import { window } from './window.js';
 import { zip } from './zip.js';
 
-export class RustIterator<T> implements Iterator<T> {
+export class RustIterator<T> implements IterableIterator<T> {
   private upstream: Iterator<T>;
 
   constructor(upstream: Iterable<T>) {
