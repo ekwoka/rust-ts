@@ -1,4 +1,4 @@
-import { Dec } from '@/types/utils';
+import { Dec } from '../types/utils';
 
 export function* flat<T, D extends depth = 1>(
   iter: Iterable<T>,

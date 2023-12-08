@@ -183,6 +183,9 @@ export class RustIterator<T> implements IterableIterator<T> {
   findIndex(checker: (item: T) => boolean): number | null {
     return this.position(checker);
   }
+  reverse() {
+    return new RustIterator(reverse(this));
+  }
 }
 
 export class PeekableRustIterator<T> extends RustIterator<T> {
@@ -203,3 +206,8 @@ export class PeekableRustIterator<T> extends RustIterator<T> {
     return this;
   }
 }
+
+const reverse = function* <T>(iter: Iterable<T>) {
+  const arr = [...iter];
+  for (let i = arr.length - 1; i >= 0; i--) yield arr[i];
+};
