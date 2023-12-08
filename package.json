@@ -29,7 +29,8 @@
     "prebuild": "rm -rf dist",
     "prepare": "husky install",
     "size": "node scripts/esbuild.js",
-    "test": "vitest"
+    "test": "vitest",
+    "sandbox": "vite ./sandbox --open --force"
   },
   "keywords": [],
   "author": "",
