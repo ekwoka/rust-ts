@@ -1,5 +1,6 @@
 import { arrayChunks, size } from './arrayChunks.js';
 import { chain } from './chain.js';
+import { cycle } from './cycle.js';
 import { enumerate } from './enumerate.js';
 import { filter } from './filter.js';
 import { depth, flat, flatMap } from './flat.js';
@@ -14,25 +15,52 @@ import { take } from './take.js';
 import { window } from './window.js';
 import { zip } from './zip.js';
 
+/**
+ * A Rust-inspired iterator class.
+ * Some semantics are adjusted to fit idiomatic JS and parallel JS Iterator Helpers
+ * and Array Iteration Methods.
+ * Rust docs: https://doc.rust-lang.org/std/iter/trait.Iterator.html
+ */
 export class RustIterator<T> implements IterableIterator<T> {
   private upstream: Iterator<T>;
 
+  /**
+   * @param upstream {Iterator<T>}
+   */
   constructor(upstream: Iterable<T>) {
     this.upstream = upstream[Symbol.iterator]();
   }
 
-  [Symbol.iterator]() {
+  /**
+   * To implement the Iterable. Returns Self (to be IterableIterator).
+   * This allows for RustIterator to be used in for-of loops, and be spread easily.
+   * @returns {IterableIterator<T>}
+   */
+  [Symbol.iterator](): IterableIterator<T> {
     return this;
   }
 
+  /**
+   * Is this iterator capable of yielding new values.
+   */
   done = false;
 
-  next() {
+  /**
+   * Get the next value from the iterator.
+   * To implement Iterator
+   * @returns {IteratorResult<T>}
+   */
+  next(): IteratorResult<T> {
     const next = this.upstream.next();
     this.done = next.done ?? false;
     return next;
   }
 
+  /**
+   * Turn this iterator into a peekable iterator.
+   * A Peekable Iterator allows you to peek at the next value without consuming it.
+   * @returns {PeekableRustIterator<T>}
+   */
   peekable(): PeekableRustIterator<T> {
     return new PeekableRustIterator(this);
   }
@@ -79,7 +107,7 @@ export class RustIterator<T> implements IterableIterator<T> {
   }
 
   arrayChunks<N extends size = 1>(size: N) {
-    return new RustIterator(arrayChunks(this, size));
+    return new RustIterator(arrayChunks<T, N>(this, size));
   }
 
   map<S>(f: (val: T) => S): RustIterator<S> {
@@ -106,7 +134,7 @@ export class RustIterator<T> implements IterableIterator<T> {
     return new RustIterator(chain(this, other));
   }
 
-  zip(other: Iterable<T>): RustIterator<[T, T]> {
+  zip<S = T>(other: Iterable<S>): RustIterator<[T, S]> {
     return new RustIterator(zip(this, other));
   }
 
@@ -130,7 +158,11 @@ export class RustIterator<T> implements IterableIterator<T> {
   }
 
   window<S extends size = 1>(n: S) {
-    return new RustIterator(window(this, n));
+    return new RustIterator(window<T, S>(this, n));
+  }
+
+  cycle(): RustIterator<T> {
+    return new RustIterator(cycle(this));
   }
 
   fold<A = T>(fn: (acc: A, item: T) => A, initial?: A): A {

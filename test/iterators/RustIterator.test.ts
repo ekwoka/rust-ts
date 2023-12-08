@@ -266,6 +266,16 @@ describe('Iterator methods', () => {
       ]);
     });
   });
+  describe('.cycle', () => {
+    it('infinitely loops an iterable', () => {
+      const iter = new RustIterator([1, 2, 3]).cycle();
+      for (let i = 0; i < 10; i++) {
+        expect(iter.next().value).toBe(1);
+        expect(iter.next().value).toBe(2);
+        expect(iter.next().value).toBe(3);
+      }
+    });
+  });
 });
 
 describe('Special Methods', () => {
