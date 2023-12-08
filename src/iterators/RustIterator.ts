@@ -6,6 +6,7 @@ import { depth, flat, flatMap } from './flat.js';
 import { forEach } from './forEach.js';
 import { inspect } from './inspect.js';
 import { map } from './map.js';
+import { reverse } from './reverse.js';
 import { scan } from './scan.js';
 import { sort } from './sort.js';
 import { stepBy } from './stepBy.js';
@@ -206,8 +207,3 @@ export class PeekableRustIterator<T> extends RustIterator<T> {
     return this;
   }
 }
-
-const reverse = function* <T>(iter: Iterable<T>) {
-  const arr = [...iter];
-  for (let i = arr.length - 1; i >= 0; i--) yield arr[i];
-};

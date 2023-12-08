@@ -279,6 +279,14 @@ describe('Special Methods', () => {
       expect([...iter]).toEqual([3, 2, 1]);
     });
   });
+  describe('reverse', () => {
+    it('should reverse an array', () => {
+      expect([...new RustIterator([1, 2, 3]).reverse()]).toEqual([3, 2, 1]);
+    });
+    it('should reverse a string', () => {
+      expect([...new RustIterator('abc').reverse()]).toEqual(['c', 'b', 'a']);
+    });
+  });
 });
 
 describe('PeekableRustIterator', () => {
