@@ -11,7 +11,7 @@ import { reverse } from './reverse.js';
 import { scan } from './scan.js';
 import { sort } from './sort.js';
 import { stepBy } from './stepBy.js';
-import { take } from './take.js';
+import { take, takeWhile } from './take.js';
 import { window } from './window.js';
 import { zip } from './zip.js';
 
@@ -124,6 +124,10 @@ export class RustIterator<T> implements IterableIterator<T> {
 
   take(n: number): RustIterator<T> {
     return new RustIterator(take(this, n));
+  }
+
+  takeWhile(f: (val: T) => boolean): RustIterator<T> {
+    return new RustIterator(takeWhile(this, f));
   }
 
   stepBy(n: number): RustIterator<T> {

@@ -181,6 +181,15 @@ describe('Iterator methods', () => {
       expect([...iter]).toEqual([1, 2]);
     });
   });
+  describe('.takeWhile', () => {
+    it('takes from an iterable while a predicate is passing', () => {
+      const iter = new RustIterator([1, 2, 3, 4, 5, 6]).takeWhile(
+        (v) => v <= 4,
+      );
+      expect([...iter]).toEqual([1, 2, 3, 4]);
+    });
+  });
+
   describe('.stepBy', () => {
     it('steps over an iterator', () => {
       const iter = new RustIterator([1, 2, 3, 4, 5, 6, 7, 8]).stepBy(3);

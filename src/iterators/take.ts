@@ -5,3 +5,13 @@ export function* take<T>(
   const iter = iterable[Symbol.iterator]();
   while (n--) yield iter.next().value;
 }
+
+export function* takeWhile<T>(
+  iterable: Iterable<T>,
+  predicate: (value: T) => boolean,
+) {
+  for (const value of iterable) {
+    if (!predicate(value)) break;
+    yield value;
+  }
+}
