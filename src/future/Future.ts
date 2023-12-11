@@ -121,16 +121,15 @@ class WrappedFuture<T, E, S = T, R = S> implements WithResolvers<T, E> {
 
 type FutureOf<T> = T extends Promise<infer P> ? P & T : T & Promise<T>;
 
-type FutureProps<T> = T extends object
-  ? {
-      [K in keyof T]: T[K] extends (...args: infer A) => infer R
-        ? (...args: A) => FutureOf<R>
-        : T[K] extends Promise<infer P>
-        ? FutureOf<P>
-        : T[K];
+type FutureProps<T> =
+  T extends object ?
+    {
+      [K in keyof T]: T[K] extends (...args: infer A) => infer R ?
+        (...args: A) => FutureOf<R>
+      : T[K] extends Promise<infer P> ? FutureOf<P>
+      : T[K];
     }
-  : T extends Promise<infer P>
-  ? FutureOf<P>
+  : T extends Promise<infer P> ? FutureOf<P>
   : T & Promise<T>;
 
 const handlers: ProxyHandler<(() => void) & { promise: Promise<unknown> }> = {

@@ -7,8 +7,9 @@ export function* flat<T, D extends depth = 1>(
   for (const item of iter) {
     if (isIterable(item))
       yield* (
-        (depth ?? 1) > 1 ? flat(item, (depth! - 1) as Dec[D]) : item
-      ) as Iterable<Flatten<T, D>>;
+        (depth ?? 1) > 1 ?
+          flat(item, (depth! - 1) as Dec[D])
+        : item) as Iterable<Flatten<T, D>>;
     else yield item as Flatten<T, D>;
   }
 }
@@ -28,8 +29,6 @@ const isIterable = <T>(val: Iterable<T> | unknown): val is Iterable<T> => {
   return typeof val === 'object' && val !== null && Symbol.iterator in val;
 };
 export type depth = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-type Flatten<T, D extends depth> = D extends 0
-  ? T
-  : T extends Iterable<infer U>
-  ? Flatten<U, Dec[D]>
-  : T;
+type Flatten<T, D extends depth> = D extends 0 ? T
+: T extends Iterable<infer U> ? Flatten<U, Dec[D]>
+: T;

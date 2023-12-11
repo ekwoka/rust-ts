@@ -24,7 +24,7 @@
   "scripts": {
     "build": "tsc",
     "coverage": "vitest run --coverage",
-    "lint": "eslint --fix ./src ./test; prettier --write ./src ./test --loglevel error",
+    "lint": "eslint --fix ./src ./test; prettier --write ./src ./test --experimental-ternaries",
     "lint:check": "eslint --max-warnings 10 ./src && prettier --check ./src",
     "prebuild": "rm -rf dist",
     "prepare": "husky install",
@@ -70,7 +70,7 @@
   "lint-staged": {
     "*.{js,ts,mjs}": [
       "eslint --fix",
-      "prettier --write"
+      "prettier --write --experimental-ternaries"
     ],
     "*.json": [
       "prettier --write"
