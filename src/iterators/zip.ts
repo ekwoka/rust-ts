@@ -1,7 +1,7 @@
-export function* zip<T>(
+export function* zip<T, S>(
   a: Iterable<T>,
-  b: Iterable<T>,
-): IterableIterator<[T, T]> {
+  b: Iterable<S>,
+): IterableIterator<[T, S]> {
   const aIter = a[Symbol.iterator]();
   const bIter = b[Symbol.iterator]();
   while (true) {

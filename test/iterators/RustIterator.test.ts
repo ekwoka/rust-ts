@@ -181,6 +181,15 @@ describe('Iterator methods', () => {
       expect([...iter]).toEqual([1, 2]);
     });
   });
+  describe('.takeWhile', () => {
+    it('takes from an iterable while a predicate is passing', () => {
+      const iter = new RustIterator([1, 2, 3, 4, 5, 6]).takeWhile(
+        (v) => v <= 4,
+      );
+      expect([...iter]).toEqual([1, 2, 3, 4]);
+    });
+  });
+
   describe('.stepBy', () => {
     it('steps over an iterator', () => {
       const iter = new RustIterator([1, 2, 3, 4, 5, 6, 7, 8]).stepBy(3);
@@ -225,7 +234,7 @@ describe('Iterator methods', () => {
   describe('.scan', () => {
     it('returns an iterator that maintains an internal state to fold values', () => {
       const iter = new RustIterator([1, 2, 3]).scan(
-        (acc, item) => acc ** item,
+        (acc, item) => (acc[0] = acc[0] ** item),
         2,
       );
       expect([...iter]).toEqual([2, 4, 64]);
@@ -241,7 +250,22 @@ describe('Iterator methods', () => {
         [5, 6],
       ]);
     });
+    it('allows flattening a specific depth', () => {
+      expect([...new RustIterator([1, [2, 3], [4, [5, 6]]]).flat(2)]).toEqual([
+        1, 2, 3, 4, 5, 6,
+      ]);
+    });
   });
+  describe('.flatMap', () => {
+    it('returns an iterator that maps over an iterable and flattens the returned values', () => {
+      expect([
+        ...new RustIterator(['hello', 'world']).flatMap((val) =>
+          val.split('l'),
+        ),
+      ]).toEqual(['he', '', 'o', 'wor', 'd']);
+    });
+  });
+
   describe('.window', () => {
     it('returns an iterator over windows of size n', () => {
       expect([...new RustIterator([1, 2, 3, 4, 5]).window(3)]).toEqual([
@@ -249,6 +273,16 @@ describe('Iterator methods', () => {
         [2, 3, 4],
         [3, 4, 5],
       ]);
+    });
+  });
+  describe('.cycle', () => {
+    it('infinitely loops an iterable', () => {
+      const iter = new RustIterator([1, 2, 3]).cycle();
+      for (let i = 0; i < 10; i++) {
+        expect(iter.next().value).toBe(1);
+        expect(iter.next().value).toBe(2);
+        expect(iter.next().value).toBe(3);
+      }
     });
   });
 });
@@ -262,6 +296,14 @@ describe('Special Methods', () => {
     it('accepts a comparison function', () => {
       const iter = new RustIterator([3, 2, 1]).sort((a, b) => b - a);
       expect([...iter]).toEqual([3, 2, 1]);
+    });
+  });
+  describe('reverse', () => {
+    it('should reverse an array', () => {
+      expect([...new RustIterator([1, 2, 3]).reverse()]).toEqual([3, 2, 1]);
+    });
+    it('should reverse a string', () => {
+      expect([...new RustIterator('abc').reverse()]).toEqual(['c', 'b', 'a']);
     });
   });
 });

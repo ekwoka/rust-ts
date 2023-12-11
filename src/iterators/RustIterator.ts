@@ -1,36 +1,66 @@
+import { arrayChunks, size } from './arrayChunks.js';
 import { chain } from './chain.js';
+import { cycle } from './cycle.js';
 import { enumerate } from './enumerate.js';
 import { filter } from './filter.js';
-import { flat } from './flat.js';
+import { depth, flat, flatMap } from './flat.js';
 import { forEach } from './forEach.js';
 import { inspect } from './inspect.js';
 import { map } from './map.js';
+import { reverse } from './reverse.js';
 import { scan } from './scan.js';
 import { sort } from './sort.js';
 import { stepBy } from './stepBy.js';
-import { take } from './take.js';
+import { take, takeWhile } from './take.js';
 import { window } from './window.js';
 import { zip } from './zip.js';
 
-export class RustIterator<T> implements Iterator<T> {
+/**
+ * A Rust-inspired iterator class.
+ * Some semantics are adjusted to fit idiomatic JS and parallel JS Iterator Helpers
+ * and Array Iteration Methods.
+ * Rust docs: https://doc.rust-lang.org/std/iter/trait.Iterator.html
+ */
+export class RustIterator<T> implements IterableIterator<T> {
   private upstream: Iterator<T>;
 
+  /**
+   * @param upstream {Iterator<T>}
+   */
   constructor(upstream: Iterable<T>) {
     this.upstream = upstream[Symbol.iterator]();
   }
 
-  [Symbol.iterator]() {
+  /**
+   * To implement the Iterable. Returns Self (to be IterableIterator).
+   * This allows for RustIterator to be used in for-of loops, and be spread easily.
+   * @returns {IterableIterator<T>}
+   */
+  [Symbol.iterator](): IterableIterator<T> {
     return this;
   }
 
+  /**
+   * Is this iterator capable of yielding new values.
+   */
   done = false;
 
-  next() {
+  /**
+   * Get the next value from the iterator.
+   * To implement Iterator
+   * @returns {IteratorResult<T>}
+   */
+  next(): IteratorResult<T> {
     const next = this.upstream.next();
     this.done = next.done ?? false;
     return next;
   }
 
+  /**
+   * Turn this iterator into a peekable iterator.
+   * A Peekable Iterator allows you to peek at the next value without consuming it.
+   * @returns {PeekableRustIterator<T>}
+   */
   peekable(): PeekableRustIterator<T> {
     return new PeekableRustIterator(this);
   }
@@ -76,6 +106,10 @@ export class RustIterator<T> implements Iterator<T> {
     return [...this];
   }
 
+  arrayChunks<N extends size = 1>(size: N) {
+    return new RustIterator(arrayChunks<T, N>(this, size));
+  }
+
   map<S>(f: (val: T) => S): RustIterator<S> {
     return new RustIterator(map(this, f));
   }
@@ -92,6 +126,10 @@ export class RustIterator<T> implements Iterator<T> {
     return new RustIterator(take(this, n));
   }
 
+  takeWhile(f: (val: T) => boolean): RustIterator<T> {
+    return new RustIterator(takeWhile(this, f));
+  }
+
   stepBy(n: number): RustIterator<T> {
     return new RustIterator(stepBy(this, n));
   }
@@ -100,7 +138,7 @@ export class RustIterator<T> implements Iterator<T> {
     return new RustIterator(chain(this, other));
   }
 
-  zip(other: Iterable<T>): RustIterator<[T, T]> {
+  zip<S = T>(other: Iterable<S>): RustIterator<[T, S]> {
     return new RustIterator(zip(this, other));
   }
 
@@ -112,16 +150,23 @@ export class RustIterator<T> implements Iterator<T> {
     return new RustIterator(inspect(this, fn));
   }
 
-  scan<A = T>(fn: (acc: A, val: T) => A, initial: A): RustIterator<A> {
+  scan<A = T, R = T>(fn: (acc: [A], val: T) => R, initial: A): RustIterator<R> {
     return new RustIterator(scan(this, fn, initial));
   }
 
-  flat() {
-    return new RustIterator(flat(this));
+  flat<D extends depth = 1>(depth?: D) {
+    return new RustIterator(flat<T, D>(this, depth));
+  }
+  flatMap<S>(mapper: (val: T) => S) {
+    return new RustIterator(flatMap(this, mapper));
   }
 
-  window(n: number): RustIterator<T[]> {
-    return new RustIterator(window(this, n));
+  window<S extends size = 1>(n: S) {
+    return new RustIterator(window<T, S>(this, n));
+  }
+
+  cycle(): RustIterator<T> {
+    return new RustIterator(cycle(this));
   }
 
   fold<A = T>(fn: (acc: A, item: T) => A, initial?: A): A {
@@ -174,6 +219,9 @@ export class RustIterator<T> implements Iterator<T> {
   }
   findIndex(checker: (item: T) => boolean): number | null {
     return this.position(checker);
+  }
+  reverse() {
+    return new RustIterator(reverse(this));
   }
 }
 

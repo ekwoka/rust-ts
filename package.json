@@ -24,33 +24,33 @@
   "scripts": {
     "build": "tsc",
     "coverage": "vitest run --coverage",
-    "lint": "eslint --fix ./src ./test; prettier --write ./src ./test --loglevel error",
-    "lint:check": "eslint --max-warnings 10 ./src && prettier --check ./src",
+    "lint": "eslint --fix ./src ./test; prettier --write ./src ./test --experimental-ternaries",
+    "lint:check": "eslint --max-warnings 10 ./src && prettier --check ./src --experimental-ternaries",
     "prebuild": "rm -rf dist",
     "prepare": "husky install",
     "size": "node scripts/esbuild.js",
-    "test": "vitest"
+    "test": "vitest",
+    "sandbox": "vite ./sandbox --open --force"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "4.2.1",
-    "@types/node": "20.9.0",
-    "@typescript-eslint/eslint-plugin": "6.10.0",
-    "@typescript-eslint/parser": "6.10.0",
+    "@trivago/prettier-plugin-sort-imports": "4.3.0",
+    "@types/node": "20.10.4",
+    "@typescript-eslint/eslint-plugin": "6.13.2",
+    "@typescript-eslint/parser": "6.13.2",
     "@vitest/coverage-c8": "0.32.2",
-    "esbuild": "0.19.5",
-    "eslint": "8.53.0",
+    "esbuild": "0.19.9",
+    "eslint": "8.55.0",
     "eslint-plugin-filename-export": "1.0.4",
     "husky": "8.0.3",
-    "lint-staged": "15.0.2",
-    "prettier": "3.0.3",
+    "lint-staged": "15.2.0",
+    "prettier": "3.1.1",
     "pretty-bytes": "6.1.1",
-    "typescript": "5.2.2",
-    "vite": "4.5.0",
-    "vite-tsconfig-paths": "4.2.1",
-    "vitest": "0.34.6"
+    "typescript": "5.3.3",
+    "vite": "5.0.7",
+    "vitest": "1.0.4"
   },
   "prettier": {
     "singleQuote": true,
@@ -70,7 +70,7 @@
   "lint-staged": {
     "*.{js,ts,mjs}": [
       "eslint --fix",
-      "prettier --write"
+      "prettier --write --experimental-ternaries"
     ],
     "*.json": [
       "prettier --write"
@@ -81,5 +81,8 @@
       "typescript@<5.2.2": "^5.2.2",
       "semver@<7.5.2": ">=7.5.2"
     }
+  },
+  "dependencies": {
+    "vite-tsconfig-paths": "^4.2.2"
   }
 }

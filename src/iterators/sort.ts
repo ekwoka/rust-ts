@@ -1,4 +1,7 @@
-const lexographicalCompare = <T>(a: T, b: T) => (a > b ? 1 : a < b ? -1 : 0);
+const lexographicalCompare = <T>(a: T, b: T) =>
+  a > b ? 1
+  : a < b ? -1
+  : 0;
 
 export function* sort<T>(
   iter: Iterable<T>,

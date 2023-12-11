@@ -1,11 +1,10 @@
-export function* scan<T, A = T>(
+export function* scan<T, A = T, R = T>(
   iter: Iterable<T>,
-  fn: (acc: A, item: T) => A,
+  fn: (acc: [A], item: T) => R,
   initial: A,
 ) {
-  let acc = initial;
+  const acc = [initial] as [A];
   for (const item of iter) {
-    acc = fn(acc, item);
-    yield acc;
+    yield fn(acc, item);
   }
 }
