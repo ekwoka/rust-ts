@@ -7,7 +7,7 @@ export function* arrayChunks<T, N extends size = 1>(
   let chunk: T[] = [];
   for (const item of iter) {
     chunk.push(item);
-    if (chunk.length === size ?? 1) {
+    if (chunk.length === (size ?? 1)) {
       yield chunk as ChunkedArray<T, N>;
       chunk = [];
     }
