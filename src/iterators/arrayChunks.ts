@@ -2,7 +2,7 @@ import { Dec } from '../types/utils';
 
 export function* arrayChunks<T, N extends size = 1>(
   iter: Iterable<T>,
-  size: N,
+  size?: N,
 ): Generator<ChunkedArray<T, N>, void, undefined> {
   let chunk: T[] = [];
   for (const item of iter) {
