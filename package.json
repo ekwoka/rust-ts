@@ -1,6 +1,6 @@
 {
   "name": "@ekwoka/rust-ts",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "Simple TS implementations of some Rust structures",
   "main": "dist/index.js",
   "module": "dist/index.js",
