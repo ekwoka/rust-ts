@@ -30,3 +30,5 @@ export type { Result } from './result/index.js';
 export { None, Some } from './option/index.js';
 export type { Option } from './option/index.js';
 export { tryFetch } from './tryFetch.js';
+
+export { DequeueVec, CircularBuffer } from './dequeuevec/index.js';
