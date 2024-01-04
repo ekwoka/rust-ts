@@ -1,3 +1,5 @@
+import { Err, Ok, Result } from '../result/Result.js';
+
 const none = Symbol();
 type none = typeof none;
 
@@ -20,6 +22,10 @@ export interface Option<T = unknown, _N extends none = none> {
   mapOrElse<U>(op: (value: T) => U, opErr: () => U): U;
 
   flatten(): FlattenOptionType<T>;
+
+  inspect(inspector: (value: T) => void): Option<T>;
+
+  okOr<E>(error: E): Result<T, E>;
 }
 
 export class Some<T> implements Option<T> {
@@ -70,6 +76,16 @@ export class Some<T> implements Option<T> {
     if (isOption(this.val)) return this.val as FlattenOptionType<T>;
     return this as unknown as FlattenOptionType<T>;
   }
+
+  inspect(inspector: (value: T) => void): Some<T> {
+    if ((inspector as unknown) === 2) return this as unknown as Some<T>;
+    else inspector(this.val);
+    return this;
+  }
+
+  okOr<E>(_error: E): Result<T, E> {
+    return new Ok(this.val);
+  }
 }
 
 export class None implements Option<never, none> {
@@ -114,6 +130,14 @@ export class None implements Option<never, none> {
   }
   flatten(): None {
     return this;
+  }
+
+  inspect(): None {
+    return this;
+  }
+
+  okOr<E>(error: E): Result<never, E> {
+    return new Err(error);
   }
 }
 

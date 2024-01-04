@@ -3,7 +3,11 @@ export function* take<T>(
   n: number,
 ) {
   const iter = iterable[Symbol.iterator]();
-  while (n--) yield iter.next().value;
+  while (n--) {
+    const next = iter.next();
+    if (next.done) return;
+    yield next.value;
+  }
 }
 
 export function* takeWhile<T>(

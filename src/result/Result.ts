@@ -1,3 +1,6 @@
+import { None } from '..';
+import { None as NoneType, Option, Some } from '../option/Option.js';
+
 const ok = Symbol();
 const err = Symbol();
 
@@ -11,7 +14,10 @@ export interface Result<T, E> {
   unwrapErr(): E;
   expect(message: string): T;
 
-  andThen<U>(op?: (value: T) => U): U | Err<E>;
+  andThen<U>(this: Ok<T>, op: (value: T) => U): U;
+  andThen<_U>(this: Err<E>): Err<E>;
+  andThen<U>(this: Result<T, E>, op?: (value: T) => U): U | this;
+
   orElse<U>(op?: (error: E) => U): U | Ok<T>;
 
   map<U>(op: (value: T) => U): Result<U, E>;
@@ -21,10 +27,19 @@ export interface Result<T, E> {
 
   inspect(inspector: (value: T) => void): Result<T, E>;
   inspectErr(inspector: (error: E) => void): Result<T, E>;
+
+  ok(): Option<T>;
+
+  flatten<R extends Result<unknown, unknown>>(this: Ok<R>): R;
+  flatten(this: Ok<T>): T extends Result<unknown, unknown> ? T : Ok<T>;
+  flatten(this: Err<E>): Err<E>;
+  flatten<U, F>(this: Result<Result<U, F>, E>): Result<U, E | F>;
+  flatten(this: Result<T, E>): Result<T, E>;
+  flatten(): Result<unknown, unknown>;
 }
 
 export class Ok<T> implements Result<T, never> {
-  ok = ok;
+  is = ok;
   value: T;
   constructor(value?: T) {
     this.value = value as T;
@@ -51,17 +66,20 @@ export class Ok<T> implements Result<T, never> {
     return this.value;
   }
 
-  andThen<U>(op: (value: T) => U): U {
-    return op(this.value);
+  andThen<U>(this: Ok<T>, op: (value: T) => U): U;
+  andThen<_U>(this: Err<never>): never;
+  andThen<U>(this: Result<T, never>, op?: (value: T) => U): U | this;
+  andThen<U>(op?: (value: T) => U): U | this {
+    return op!(this.value);
   }
   orElse(): Ok<T> {
     return this;
   }
 
-  map<U>(op: (value: T) => U): Ok<U> {
+  map<U>(op: (value: T) => U): Result<U, never> {
     return new Ok(op(this.value));
   }
-  mapErr(): Ok<T> {
+  mapErr(): Result<T, never> {
     return this;
   }
   mapOr<U>(op: (value: T) => U, _defaultValue: U): U {
@@ -72,17 +90,31 @@ export class Ok<T> implements Result<T, never> {
   }
 
   inspect(inspector: (value: T) => void): Ok<T> {
-    if ((inspector as unknown) === 2) return this.value as unknown as Ok<T>;
+    if ((inspector as unknown) === 2) return this.value as unknown as this;
     else inspector(this.value);
     return this;
   }
   inspectErr(): Ok<T> {
     return this;
   }
+
+  ok(): Option<T> {
+    return new Some(this.value);
+  }
+
+  flatten<R extends Result<unknown, unknown>>(this: Ok<R>): R;
+  flatten(this: Ok<T>): T extends Result<unknown, unknown> ? T : this;
+  flatten(this: Err<never>): never;
+  flatten<U, F>(this: Result<Result<U, F>, never>): Result<U, never | F>;
+  flatten(this: Result<T, never>): this;
+  flatten(): T | this | Result<unknown, unknown> {
+    const val = this.value;
+    return isResult(val) ? val : this;
+  }
 }
 
 export class Err<E> implements Result<never, E> {
-  err = err;
+  is = err;
   error: E;
   constructor(error?: E) {
     this.error = error as E;
@@ -118,10 +150,10 @@ export class Err<E> implements Result<never, E> {
     return op(this.error);
   }
 
-  map(): Err<E> {
+  map(): Result<never, E> {
     return this;
   }
-  mapErr<U>(op: (error: E) => U): Err<U> {
+  mapErr<U>(op: (error: E) => U): Result<never, U> {
     return new Err(op(this.error));
   }
   mapOr<U>(_op: (value: never) => U, defaultValue: U): U {
@@ -137,6 +169,21 @@ export class Err<E> implements Result<never, E> {
   }
   inspectErr(inspector: (error: E) => void): Err<E> {
     inspector(this.error);
+    return this;
+  }
+
+  ok(): NoneType {
+    return None;
+  }
+
+  flatten<U extends Result<unknown, unknown>>(this: Ok<U>): U;
+  flatten(
+    this: Ok<never>,
+  ): never extends Result<unknown, unknown> ? never : Ok<never>;
+  flatten(this: Err<E>): Err<E>;
+  flatten<U, F>(this: Result<Result<U, F>, E>): Result<U, E | F>;
+  flatten(this: Result<never, E>): Result<never, E>;
+  flatten(): unknown {
     return this;
   }
 }
@@ -164,3 +211,6 @@ export const TryAsync = async <T, E = Error>(
     return new Err(e as E);
   }
 };
+
+export const isResult = (value: unknown): value is Result<unknown, unknown> =>
+  value instanceof Ok || value instanceof Err;
