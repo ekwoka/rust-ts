@@ -277,3 +277,84 @@ Returns `true` if the `Option<T>` is, in fact, `None` otherwise `false`
 #### `okOr<E>(error: E): Result<T, E>`
 
 Returns an `Ok<T>` for `Some<T>` otherwise returns an `Err<E>` for `None` created from the passed in `error`.
+
+## `RustIterator`
+
+This is a simple and clean implementation of the `Iter` trait from Rust, named as `RustIterator` to avoid conflicts with the current abstract `Iterator` interface in TypeScript, or the upcoming `Iterator` interface in JavaScript.
+
+Right now, iterators in JavaScript SUCK. They're really bad. You can call `next()` check if the iterator is `done` , do a `for..of` loop, or spread it into an `Array`. That's not a whole lot.
+
+Doing more active work with iterable values is left to `TransformStream` implementations that are required to be `async` and involve a lot more work currently (though `compose` in Node and Bun makes it quite a bit easier). Or of course, just doing a bunch of loops, or resorting to the various `Array` methods, which can perform unnecessary work, consume more memory, and generally just be inefficient.
+
+> Note: the `Array` methods will often be more performant than this `Iter` implementation. This is due in part both to the fact the `Array` methods are highly optimized in the native side of the runtimes, and that the implementations of native `Iterator` and `Generator` which this relies on are needlessly wasteful.
+> There are still plenty of cases, especially with potentially infinite data, where this iterator implementation can reduce the total amount of work done. The main case would be in large lists, that will have many `map` and `filter` style operations but where you only want the first `n` values. the `Array` methods would need to `map` and `filter` the entire list, even if only `5` final values are used.
+
+The main benefit of this `Iterator` implementation, is not performance over existing native alternatives, but in the breadth of operations offered for iterating over the data contained.
+
+### `IterableIterator<T>`
+
+`RustIterator<T>` implements both the `Iterable<T>` and `Iterator<T>` interfaces, which, by definition, means it implements `IterableIterator<T>`.
+
+What this means is that you can use it in all cases where an `Iterable` or `Iterator` is needed, like in `for..of` loops, spreading into a list (`...`) or destructuring `[first, second] = iter`.
+
+The following methods/properties are how these interfaces are implemented.
+
+#### `next(): IteratorResult<T>`
+
+Returns the next yielded value from the iterator as an `IteratorResult<T>`. This consumes one value of the upstream `Iterator`
+
+```ts
+interface IteratorResult<T> {
+  done: boolean;
+  value: T | undefined
+}
+```
+
+#### `done: Boolean`
+
+Allows introspecting into whether the `Iterator` is capable of yielding new values.
+
+> This does not consume any part of the `Iterator`, and as such does not actually KNOW if the `Iterator` is done, just indicates if the `Iterator` has previously completed. This means an `Iterator` with a `done` value of `false` may or may not actually have an additional value, but a `done` of `true` means the `Iterator` should not yield any new values.
+> `Iterator` instances that were previously `done` can still yield new values (and mark themselves as not `done`) in the future, on a technical level. `RustIterator` instances will generally never actually do this, as nearly every method will return a fused iterator that will never again yield a new value.
+
+#### `[Symbol.iterator](): RustIterator<T>`
+
+Returns itself, as an `Iterator`.
+
+This method, called with the well-known `Symbol` `@@iterator` is used internally when doing `Array` destructuring, spreading, or `for..of` looping over `Iterable` objects. This is all that is needed to implement the `Iterable` abstract interface. 
+
+In this case, the method simply returns the same `RustIterator` instance it is called on, not a distinct object.
+
+> Checking `maybeIterator[Symbol.iterator]() === maybeIterator` is the most common way to check if an object is an `Iterator`, as all native `Iterator` implement `Iterable` and return themselves for this method. Checking for the existence of a `next` method is much less of a guarantee.
+
+### `new RustIterator<T>(upstream: Iterable<T>)
+
+Constructs a new `RustIterator` from an `Iterable`.
+
+This will call the `@@iterator` method on the `Iterable` and store the returned `Iterator` internally. This will not otherwise consume any `Iterator` passed in. If the `Iterable` supplied, is an `Iterator` then consuming the `RustIterator` would consume that `Iterator`.
+
+Creating a `RustIterator` from an upstream `RustIterator` will return a new `RustIterator` that wraps the previous, not simply the same `RustIterator`. It will not clone the values, or any other magic.
+
+
+
+### `new PeekableRustIterator<T>(upstream: Iteratable<T>)`
+
+`PeekableRustIterator` is a special kind of `RustIterator` that enables special behavior to allow you to inspect the next value to be yielded by `next`, without consuming the `Iterator`.
+
+#### `peek(): IteratorResult<T>`
+
+Returns the `IteratorResult` that will next be yielded when calling `next`. This can allow the developer to check the next value, and change course, without consuming the value in the `Iterator`.
+
+> Due to how `Iterator` work, this WILL consume the next value from the upstream `Iterator` as that value will need to be consumed to inspect it. If you split iterators out and consume them in different places strategically, this will block that value from being able to be yielded by other consumers of that `Iterator`.
+> That value is stored internally and will be returned the next time `next` is called.
+
+#### `peekable(): PeekableRustIterator<T>`
+
+on both `PeekableRustIterator` and `RustIterator`, the `peekable` method returns a `PeekableRustIterator`. Naturally returning itself, and a new instance respectively.
+
+#### `peeked: IteratorResult<T>`
+
+If the `Iterator` is currently in the state of having been `peeked` (`peek` has been called since the last time `next` was called), this will return that `IteratorResult`, otherwise `undefined`. This is primarily internal for handling the `peeked` value.
+
+### Consuming Methods
+
