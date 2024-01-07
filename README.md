@@ -335,8 +335,9 @@ This will call the `@@iterator` method on the `Iterable` and store the returned 
 
 Creating a `RustIterator` from an upstream `RustIterator` will return a new `RustIterator` that wraps the previous, not simply the same `RustIterator`. It will not clone the values, or any other magic.
 
+#### `nextChunk(n: number): IteratorResult<T[]>`
 
-
+Returns an `IteratorResult` of an `Array` containing the next `n` values from the `Iterator`. If the `Iterator` yields less than `n` values, the `IteratorResult` will be marked `done` and only include all those values yielded up to `n`. There is no guarantee in this method that `n` values will be returned, just that no more than `n` will be returned.
 ### `new PeekableRustIterator<T>(upstream: Iteratable<T>)`
 
 `PeekableRustIterator` is a special kind of `RustIterator` that enables special behavior to allow you to inspect the next value to be yielded by `next`, without consuming the `Iterator`.
@@ -356,5 +357,280 @@ on both `PeekableRustIterator` and `RustIterator`, the `peekable` method returns
 
 If the `Iterator` is currently in the state of having been `peeked` (`peek` has been called since the last time `next` was called), this will return that `IteratorResult`, otherwise `undefined`. This is primarily internal for handling the `peeked` value.
 
+#### Extends `RustIterator<T>`
+
+All of `RustIterator` methods and properties are available on `PeekableRustIterator`
+
 ### Consuming Methods
 
+There are many different styles of methods on `RustIterator` beyond the basic interfaces presented above. I've loosely grouped these into `Consuming`, `Iterating`, and `Special` categories.
+
+- Consuming: Immediately consumes all or a portion of the `Iterator` returning a value made from them (ex. `collect`/`reduce`)
+- Iterating: Returns a new `RustIterator` that will transform the values when consumed, but does not consume the original `Iterator` (ex. `map`/`filter`)
+- Special: Anything else, mainly methods that will return a new `RustIterator` while also consuming the previous `Iterator` (ex `reverse`/`sort`)
+
+These are semantically grouped, as the mental model for how you might use them in more complex applications is distinct.
+
+All of the methods in this group consume the `Iterator`, partially or in full, performing all upstream work to yield those values. If an `Iterator` infinitely yields values, these can potentially lock the thread entirely.
+
+#### `collect(): T[]`
+
+Probably the most important `Consuming` method, `collect` consumes the `Iterator` and places all of the values into an `Array`. Very useful for passing the values out to things that need `Array` or storing an intermediary collection of the values, to allow multiple iterations.
+
+#### `forEach(f: (val: T) => void): void`
+
+> See `Array.forEach`
+
+Consumes the `Iterator`, calling `f` with each value.
+
+#### `fold<A = T>(fn: (acc: A, item: T) => A, initial?: A): A`
+
+> Similar to `Array.reduce`.
+
+Consumes the `Iterator`, calling `fn` with each value and the `initial` as an accumulator. The returned value from each `fn` call, is passed as the `acc`.
+
+> If no `initial` is passed, the very first item yielded by the `Iterator` is used as the accumulator, with the first call of `fn` being passed both the first and second yielded values.
+
+This is the generalized form of `reduce` that allows the `acc` type to be different from `T`.
+
+#### `reduce(fn: (acc: T, item: T) => T, initial?: T): T`
+
+> Similar to `Array.reduce` but requires `acc` be the same type as `T`
+
+> Internally uses `fold`
+
+Consumes the `Iterator`, calling `fn` with each value and the provided `initial` as an accumulator. If no `initial` is provided, the first value will be used as the accumulator.
+
+The value returned from each calling of `fn` is passed as the first argument (`acc`) to the following call of `fn`, with the final iterations return value being returned.
+
+#### `sum(): T where T = number | string | bigint`
+
+> Internally uses `reduce`
+
+Consumes the `Iterator`, adding the values together (with the `+` operator), returning the final value (a summed `number` or `bigint` or a concatenated `string`)
+
+This will only have predictable results on `string`, `number` and `bigint` type `Iterator`.  Other primitives and objects can have unpredictable and not type safe results.
+
+#### `max(): T | undefined where T = number | bigint | string`
+
+> Internally uses `reduce`
+
+Returns the maximum value (with the `>` operator) yielded by the `Iterator`.
+
+This will only have predictable results on `string`, `number` and `bigint` type `Iterator`.  Other primitives and objects can have unpredictable and not type safe results.
+
+> `string` values will be sorted by the first `codepoint` that differs between two `string` values, with later `codepoint` being returned. Characters that are made of multiple `codepoint` are treated as two separate `codepoint`. This mainly applies to non-English texts and Emojis.
+
+#### `min(): T | undefined where T = number | bigint | string`
+
+> Internally uses `reduce`
+
+Returning the minimum value (with the `<` operator) yielded by the `Iterator`.
+
+This will only have predictable results on `string`, `number` and `bigint` type `Iterator`.  Other primitives and objects can have unpredictable and not type safe results.
+
+> `string` values will be sorted by the first `codepoint` that differs between two `string` values, with earlier `codepoint` being returned. Characters that are made of multiple `codepoint` are treated as two separate `codepoint`. This mainly applies to non-English texts and Emojis.
+
+
+#### `find(checker: (item: T) => unknown): T | null`
+
+Calls the `checker` with each yielded value, returning the first value that results in a `truthy` value. Returns `null` if no such value is found.
+
+> The `Iterator` is only consumed up until the first match. Any remaining values could still be yielded. Calling `find` multiple times could be used like `filter` in cases where the filtering condition may change as the `Iterator` is iterated.
+
+#### `any(checker: (item: T) => unknown): boolean`
+
+> Internally uses `find`
+
+> See to `Array.some`
+
+Returns `true` if any yielded value returns `true` when passed to the `checker`, otherwise `false`.
+
+> Will return `false` if the `Iterator` yields no values
+
+#### `all(checker: (item: T) => unknown): boolean`
+
+> Internally uses `any`
+
+> See `Array.every`
+
+Returns `true` is all the yielded values return `true` when passed to the `checker`, otherwise `false`.
+
+> Will return `true` if the `Iterator` yields no values
+
+#### `position(checker: (item: T) => boolean): number | null`
+
+> Similar `Array.findIndex`, except that it will not return `-1` on no match
+
+Returns the 0-index of the first yielded value that returns `true` when passed to the `checker`.
+
+Returns `null` when no yielded values match
+
+#### `findIndex(checker: (item: T) => boolean): number | null`
+
+> Alias for `position`
+
+#### `count(): number`
+
+Returns the count of items returned by the `Iterator`.
+
+#### `last(): T | undefined`
+
+Returns the final value yielded by the `Iterator`. If the `Iterator` is already `done` or never yields a value before becoming `done`, returns `undefined`.
+
+#### `advanceBy(n: number): void`
+
+Advances the `Iterator` `n` steps consuming those values.
+
+#### `nth(n: number): T | undefined`
+
+Returns the `nth` value yielded by the `Iterator`. If the `Iterator` becomes `done` before `n` values, returns `undefined`
+
+
+### Iterating Methods
+
+All of the following methods return a new `RustIterator` without consuming any values of the previous. This new `Iterator` will yield transformed, filtered, or other modified values of the previous `Iterator`.
+
+#### `map<S>(f: (val: T) => S): RustIterator<S>`
+
+> See `Array.map`
+
+Will yield the result of passing each value to `f`.
+
+#### `filter(f: (val: T) => boolean): RustIterator<T>`
+
+> See `Array.filter`
+
+Will yield only values that, when passed to `f`, return a `truthy` value.
+
+#### `take(n: number): RustIterator<T>`
+
+Will yield only the first `n` values
+
+#### `takeWhile(f: (val: T) => boolean): RustIterator<T>`
+
+Will continue to yield values until a value, when passed to `f` returns a `falsy` value.
+
+> Will not yield the first value that returns `falsy`, but it will consume that value from the upstream `Iterator`.
+
+
+#### `stepBy(n: number): RustIterator<T>`
+
+Will yield only ever `nth` value from the upstream `Iterator`.
+
+#### `enumerate(): RustIterator<[number, T]>`
+
+Will yield tuples of the 0-index and the value.
+
+This is useful for having access to the index like is available in the `Array` methods
+
+#### `arrayChunks<N extends size = 1>(size: N)`
+
+Will yield tuples of `size` length of values from the `Iterator`.
+
+> If the end of the `Iterator` is reached and the internal chunk is not yet `size` length, the chunk is yielded as is. The missing values will be `undefined`.
+
+#### `inspect(fn: (val: T) => void): RustIterator<T>`
+
+Yields every value as is, but first passes the value to `fn`.
+
+This allows accessing the value, primarily for debugging purposes, expressively in the method chain.
+
+The most simple use is with `console.log` 
+
+```ts
+iter.inspect(console.log).filter(Boolean).inspect(console.log).collect()
+```
+
+#### `scan<A = T, R = T>(fn: (state: [A], val: T) => R, initial: A): RustIterator<R>`
+
+Yields the result of passing the value to `fn`.
+
+`fn` is also passed a tuple of `initial` as the starting `state`, and continues to pass that same `state` as an argument to each calling of `fn`. When you mutate `state`, this allows you to iterate while maintaining some kind of internal "memory" to the iteration, so it can have some sense of the past.
+
+
+#### `flat<D extends depth = 1>(depth?: D)`
+
+> See `Array.flat`
+
+Yields the individual values yielded by flattening the value (`where T = Iterable`) `depth` number of times.
+
+This can allow multiple `Iterable` to be combined, to iteratively iterate over each successive `Iterable`.
+
+> For this purpose, only `Iterable` objects will be flattened. `string`, while `Iterable`, will not be flattened into individual characters or `codepoint`.
+
+
+#### `flatMap<S>(mapper: (val: T) => S)`
+
+> See `Array.flatMap`
+
+Yields the individual items yielded by flattening the result of calling `mapper` with the value. This will only flatten a single level.
+
+This is similar to separately calling `.map.flat` with a `depth` of `1`.
+
+> For this purpose, only `Iterable` objects will be flattened. `string`, while `Iterable`, will not be flattened into individual characters or `codepoint`
+
+#### `window<S extends size = 1>(n: S)`
+
+Yields tuples of `n` size containing a rolling window of values. Each subsequent yielded value will be the same as the previous, except with the head value removed, and a new value added at the tail.
+
+> No window will be yielded until `n` values are consumed, even if the `Iterator` becomes `done` before then. Similarly, once the `Iterator` is done, no more values will be yielded. This means each window yielded will be `n` size, each time, every time.
+
+### Special Methods
+
+These methods don't cleanly fit into the above groups of methods. At this time, this mainly means they return a new `RustIterator` while consuming the previous, or otherwise having a behavior that is not simple to consider them as simply `Iterating`.
+
+#### `chain(other: Iterable<T>): RustIterator<T>`
+
+Individually yields all the values of `other` AFTER consuming all of the upstream `Iterator`.
+
+#### `zip<S = T>(other: Iterable<S>): RustIterator<[T, S]>
+
+Successively yields a tuple of the next values of both the upstream `Iterator` and `other`.
+
+This is useful for merging values together as pairs automatically.
+
+#### `cycle(): RustIterator<T>`
+
+Repeatedly yields each individual value of the upstream `Iterator` forever, resulting in an `Iterator` that can never be `done`.
+
+> As this requires storing all yielded values in memory, for large datasets, this means a lot of memory. 
+
+As the returned `Iterator` can NEVER end, `Consuming` methods could result in a blocked thread, if there have not been additional methods that limit the length of the `Iterator` (like `take`, `takeWhile`, `find`) that will eventually fuse the `Iterator`.
+
+#### `sort(compare?: (a: T, b: T) => number): RustIterator<T>`
+
+> See `Array.sort`
+
+Yields each value of the upstream `Iterator`, after sorting the values through `compare`.
+
+> By default this uses a `lexigraphicCompare` sort when no `compare` is passed. This emulates the native behavior of `Array.sort`, although mixed arrays of `number | string` can have strange results, as this will not turn all `number` to `string` when sorting. 
+> It is recommended to provide your own `compare` any time you have values that are not strictly `number | bigint`.
+
+To accomplish this, the upstream `Iterator` is completely consumed and stored in memory, immediately upon calling this method, even if the returned `RustIterator` has not yielded any values.
+
+To reduce the total work performed, and iteratively sort the values, a Bubble Sort algorithm is used.
+
+When the resulting `Iterator` yields a value, the first value bubbles through being compared to each remaining value, being swapped as needed. When this process is done, the value is yielded.
+
+As values are yielded, the internal storage of values is reduced in memory.
+
+While Bubble Sort can increase total comparisons when needing to sort the entire list, it works nicely for this use case, as it doesn't prematurely sort any sub arrays while producing the next value. This is ideal for the purpose of an `Iterator` where you do as little work as possible until it is finally needed, and where not all values will actually need to be sorted, as in the following example.
+
+```ts
+const lowestThreePrices = prices.sort().take(3).collect()
+```
+
+While this will `collect` all of the `prices`, it will only sort out the lowest three values, discarding the remaining unsorted values.
+
+> Due to the naive nature of the sorting implementation, the order of like values (those that when compared with `compare` return `0`) is not preserved from the original order. In fact, they will almost always be reversed. Maybe that's something to fix....in the future...
+
+#### `reverse(): RustIterator<T>`
+
+> See `Array.reverse`
+
+Individually yields all the values of the upstream `Iterator` in reverse order.
+
+To accomplish this, the upstream `Iterator` is completely consumed and stored in memory, immediately upon calling this method, even if the returned `RustIterator` has no yet yielded any values.
+
+> The values in memory are not stored in reverse order, instead the values are yielded from the tail to the front.
