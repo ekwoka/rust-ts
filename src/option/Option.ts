@@ -11,7 +11,6 @@ export interface Option<T = unknown, _N extends none = none> {
   unwrap(): T;
   unwrapOr(defaultValue: T): T;
   unwrapOrElse(op: () => T): T;
-  unwrapErr(): null;
   expect(message: string): T;
 
   andThen<U>(op: (value: T) => U): U | None;
@@ -48,9 +47,6 @@ export class Some<T> implements Option<T> {
   }
   unwrapOrElse(_op: never): T {
     return this.val;
-  }
-  unwrapErr(): never {
-    throw new Error('called `Result.unwrapErr()` on an `Ok` value');
   }
   expect(_msg: string): T {
     return this.val;
@@ -104,9 +100,6 @@ export class None implements Option<never, none> {
   }
   unwrapOrElse<T>(op: () => T): T {
     return op();
-  }
-  unwrapErr() {
-    return null;
   }
   expect(msg: string): never {
     throw new Error(`Error unwrapping None. Expected ${msg}`);
