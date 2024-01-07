@@ -31,4 +31,4 @@ export { None, Some } from './option/index.js';
 export type { Option } from './option/index.js';
 export { tryFetch } from './tryFetch.js';
 
-export { DequeueVec, CircularBuffer } from './dequeuevec/index.js';
+export { VecDequeue, CircularBuffer } from './vecdequeue/index.js';

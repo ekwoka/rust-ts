@@ -1,15 +1,15 @@
-import { DequeueVec } from '@/dequeuevec/index';
+import { VecDequeue } from '@/vecdequeue';
 
-describe('DequeueVec', () => {
+describe('VecDequeue', () => {
   it('stores an array', () => {
     const a = [1, 2, 3];
-    const d = new DequeueVec(a);
+    const d = new VecDequeue(a);
     expect(d.buffer).toEqual(a);
     expect(d.first()).toEqual(1);
     expect(d.last()).toEqual(3);
   });
   it('doubles in size when full to make room for new values', () => {
-    const d = new DequeueVec(3);
+    const d = new VecDequeue(3);
     d.push(1);
     d.push(2);
     d.push(3);
@@ -19,7 +19,7 @@ describe('DequeueVec', () => {
     expect(d.last()).toEqual(4);
   });
   it('can move wrapped items into extended memory space', () => {
-    const d = new DequeueVec(3);
+    const d = new VecDequeue(3);
     d.push(1);
     d.push(2);
     d.push(3);
@@ -32,28 +32,28 @@ describe('DequeueVec', () => {
     expect(d.buffer).toEqual([undefined, 2, 3, 4, 5, undefined]);
   });
   it('can push', () => {
-    const d = new DequeueVec(3);
+    const d = new VecDequeue(3);
     d.push(4);
     expect(d.buffer).toEqual([4, undefined, undefined]);
     expect(d.first()).toEqual(4);
     expect(d.last()).toEqual(4);
   });
   it('can pop', () => {
-    const d = new DequeueVec([1, 2, 3]);
+    const d = new VecDequeue([1, 2, 3]);
     expect(d.pop()).toEqual(3);
     expect(d.buffer).toEqual([1, 2, undefined]);
     expect(d.first()).toEqual(1);
     expect(d.last()).toEqual(2);
   });
   it('can unshift', () => {
-    const d = new DequeueVec(3);
+    const d = new VecDequeue(3);
     d.unshift(4);
     expect(d.buffer).toEqual([undefined, undefined, 4]);
     expect(d.first()).toEqual(4);
     expect(d.last()).toEqual(4);
   });
   it('is iterable', () => {
-    const buff = new DequeueVec([1, 2, 3]);
+    const buff = new VecDequeue([1, 2, 3]);
     const iter = buff[Symbol.iterator]();
     expect(iter.next()).toEqual({ value: 1, done: false });
     expect(iter.next()).toEqual({ value: 2, done: false });
@@ -62,7 +62,7 @@ describe('DequeueVec', () => {
     expect([...buff]).toEqual([1, 2, 3]);
   });
   it('can become RustIterator', () => {
-    const buff = new DequeueVec([1, 2, 3]);
+    const buff = new VecDequeue([1, 2, 3]);
     expect(
       buff
         .toIter()
@@ -71,7 +71,7 @@ describe('DequeueVec', () => {
     ).toEqual([2, 4, 6]);
   });
   it('iterates properly around the circular memory', () => {
-    const buff = new DequeueVec([1, 2, 3]);
+    const buff = new VecDequeue([1, 2, 3]);
     buff.shift();
     expect(buff.tail).toBe(0);
     buff.push(4);
@@ -84,22 +84,22 @@ describe('DequeueVec', () => {
     expect([...buff]).toEqual([2, 3, 4, 5, 6, 7]);
   });
 });
-describe('DequeueVec.from', () => {
+describe('VecDequeue.from', () => {
   it('can be created from an array', () => {
     const a = [1, 2, 3];
-    const d = DequeueVec.from(a);
+    const d = VecDequeue.from(a);
     expect(d.buffer).toEqual(a);
     expect(d.first()).toEqual(1);
     expect(d.last()).toEqual(3);
   });
   it('can be created from options object', () => {
-    const d = DequeueVec.from({ length: 3 });
+    const d = VecDequeue.from({ length: 3 });
     expect(d.buffer).toEqual([undefined, undefined, undefined]);
     expect(d.first()).toEqual(undefined);
     expect(d.last()).toEqual(undefined);
   });
   it('can be created from an object with a mapper', () => {
-    const d = DequeueVec.from({ length: 3 }, (v, i) => v + i);
+    const d = VecDequeue.from({ length: 3 }, (v, i) => v + i);
     expect(d.buffer).toEqual([0, 2, 4]);
     expect(d.first()).toEqual(0);
     expect(d.last()).toEqual(4);

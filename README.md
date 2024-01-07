@@ -634,3 +634,162 @@ Individually yields all the values of the upstream `Iterator` in reverse order.
 To accomplish this, the upstream `Iterator` is completely consumed and stored in memory, immediately upon calling this method, even if the returned `RustIterator` has no yet yielded any values.
 
 > The values in memory are not stored in reverse order, instead the values are yielded from the tail to the front.
+
+## `VecDequeue`/`CircularBuffer`
+
+Outside of the JavaScript world, `Array` are commonly of a fixed size (known at compile time to arrange for a fixed memory space). Naturally, this means that `Array` cannot change in size, like having items added or removed, which is how JavaScript `Array` work.
+
+In these languages, commonly `Vector` (or `Vec`) is used to indicate a sequential list of unknown size (like JavaScript `Array`).
+
+So that's why it's a `Vec`, but what is the meaning of the `Dequeue`?
+
+### The Problem with `Array`
+
+Both Rust `Vec` and JavaScript `Array` work in a specific way. They have one item at the start, followed by all the other items. Adding to the tail (`push`) and removing from the tail (`pop`) is simple. You just (provided there is enough memory) stick the item in the next spot, or take it out. Very simple. This is a structure commonly called a `Stack`. Last thing in is the first thing out. Very efficient.
+
+> When implementing some pathfinding algorithms, you may handle the next step to check with a `Stack`. A simple `Depth First Search` (`DFS`) will almost always use a `Stack`
+
+However, adding to the head (`unshift`) and removing from the head (`shift`) are much more complicated. To add a new item to the head, you need to move every other item in the list over one. So the item at index `0` is moved to index `1` and the item at index `1` is moved to index `2` and so on. Similar for removing (just moving everything to a lower index).
+
+It's common in many algorithms, to use an `Array` as a `Queue`, where new items are added to the tail, and items are removed from the head. When used like this, `Array` perform a lot of extra work to move every item forward in line. This can be responsible for significant slowdowns when the `Queue` gets to be thousands or tens of thousands of items long.
+
+> In many pathfinding algorithms, a `Queue` is used to schedule the search. A simple `Breadth First Search` (`BFS`) would use a `Queue`. Commonly, `Djikstra` and `A*` would use a `Queue` though they can technically be made to do either, for different reasons.
+
+### The Solution
+
+So, if we can add many items to the tail of a `Queue`, but each time we remove an item from the head (or DE-QUEUE it!) there is a lot of extra work moving items around, how could we make the removing of items be as efficient as if we were using a `Stack`?
+
+The answer is in how `Array` use the memory they are given.
+
+Typically, at the System level, lists that can be of a dynamic length. They will start with some initial size (commonly `0`) and as items are added, more memory is allocated to them, and when these allocations happen, the `Array` is moved around in memory to where it can have a single contiguous block of memory.
+
+When items are removed, the allocated space is *not* reduced. Instead the `Array` still occupies that space, even with no values. In JavaScript, during garbage collection, the `Array` may be moved, and the memory resized.
+
+The basic thing to understand is that the space in memory is fixed (when not growing).
+
+So, if the memory is fixed, and we `pop` an item off the tail, the memory is not released from the `Array`, but that space now holds no value. So, what if we could, when we `shift` a value off the head, do the same thing? Just push the start of the actual item list of the `Array` at a space in memory that is not actually the beginning of the memory space?
+
+Well, that's how a `VecDequeue` works!!! When an item is removed from the front, we just internally track the head of the `Vec` as being at a later index. This way, items do not actually need to be moved.
+
+### The Circular Buffer
+
+Now, just doing that, and marching the memory along would be impractical. If we just keep pushing memory to the tail and adjusting the head back, we could end up with a memory space that is many gigabytes in size, but containing little real data! That's a horrible memory leak!
+
+`VecDequeue` in Rust, and this `VecDequeue` in this package both handle this issue by having the memory instead be a `Circular Buffer` (which is why `VecDequeue` is exported under the alias `CircularBuffer` as well). In a `Circular Buffer` all of the list items are stored in order (as opposed to a `Linked List` that would store them scattered in memory), but the memory space is treated as being *circular* - that is, the next item after the one stored at the end of memory is at the beginning of the memory.
+
+As items are added and removed, the offsets for the head and tail are moved around, modifying data, but leaving everything in place. When the tail wraps all the way around to the head, we increase the total memory, and do a quick shifting of the wrapped portion of the tail to be contiguous with the head portion in the new memory space.
+
+This means we do still sometimes move items around in memory, but only as the buffer grows. To help reduce this, the size of the buffer is doubled whenever new memory is needed, not expanded one by one. This is a common handling of list memory.
+
+### Maybe we need a Demonstration...
+
+In a typical `Array`, these operations would look like this:
+
+> `empty` is used here to refer to a spot in the list *in memory* that does not have a value. It may or may not be viewable when logging an `Array` as normally that only shows `empty` known items, not in memory space.
+
+> Multiple lines of comments are used to indicate the internal steps the list may use to ahndle the code action
+
+```ts
+
+const array = new Array(3) // [empty, empty, empty]
+
+array.push(1) // [1, empty, empty]
+
+array.push(2) // [1, 2, empty]
+
+array.push(3) // [1, 2, 3]
+
+array.shift()
+  // | [empty, 2, 3]
+  // | [2, empty, 3]
+  // | [2, 3, empty]
+
+array.push(4) // [2, 3, 4]
+
+array.shift()
+  // | [empty, 3, 4]
+  // | [3, empty, 4]
+  // | [3, 4, empty]
+
+array.unshift(5)
+  // | [3, empty, 4]
+  // | [empty, 3, 4]
+  // | [5, 3, 4]
+```
+
+Naturally, this gets worse and worse! While `push` and `pop` are `O(1)`, `shift` and `unshift` are both `O(n)`!!
+
+Okay, so how does a `Circular Buffer` work?
+
+```ts
+const array = new CicularBuffer(3) // [empty, empty, empty]
+
+array.push(1) // [1, empty, empty]
+
+array.push(2) // [1, 2, empty]
+
+array.push(3) // [1, 2, 3]
+
+array.shift() // [empty, 2, 3]
+
+array.push(4) // [4, 2, 3]
+
+array.shift() // [4, empty, 3]
+
+array.unshift(5)  // [4, 5, 3]
+```
+
+Back to just `O(1)` updates!!
+
+How does this shake out in practice?
+
+In the benchmarks (in this repo run `pnpm exec vitest bench`), we see that the performance difference in different situations is as follows:
+
+- As a **Queue** (`push` to tail, `shift` from head): `VecDequeue` performs **4.7x** faster than `Array`
+- As a **Stack** (`push` to tail, `pop` from tail): `Array` performs **1.1x** faster than `VecDequeue`
+- With **only head** (`unshift` to head, `shift` from head): `VecDequeue` performs ***17x*** faster than `Array`
+
+These will of course depend, in reality, on how many operations, the distribution of those operations, and the size of the list. There were some situations where `VecDequeue` even out performed `Array` as a `Stack`.
+
+So, `Stack` use cases may still benefit from just being a native `Array`, other cases can massively benefit from using a `VecDequeue`
+
+### Usage
+
+Using a `VecDequeue` is very similar to using an `Array`, we just don't get the nice literal syntax.
+
+```ts
+import { VecDequeue } from '@ekwoka/rust-ts'
+
+const array = new VecDequeue()
+
+for (let i = 0; i < 100; i++)
+  array.push(i)
+```
+
+#### API
+
+The goal for this API, though not quite there now, is to implement the whole `Array` interface, as well as a few of the useful methods of the `VecDequeue` struct from Rust. When the two have differently named methods that do the same thing, the primary name is the `Array` method, though many will be aliased with a camelcase version of the Rust name.
+
+#### `new VecDequeue<T>(initializer: Array<T> | number = 0)`
+#### `new CircularBuffer<T>(initializer: Array<T> | number = 0)`
+
+The class is exported under both `VecDequeue` and `CircularBuffer` for convenience. It's the exact same thing.
+
+When the `initializer` is an `Array`, the `Vec` buffer is initialized to the size of that array, the values are copied into the `Vec` buffer.
+
+When the `initializer` is a `number` (or nothing, defaulting to `0`), The `Vec` buffer is initialized to a size of the max of `1` or the number.
+
+#### `at(i: number): T`
+
+Returns the value at `i` index.
+
+> This is not the index within the internal buffer, but the 0-index from the head as it wraps around the circular buffer
+
+
+#### `get(i: number): T`
+
+> Alias of `at`
+#### `set(i: number, v: T): void`
+
+Sets a value to the `i` index.
+

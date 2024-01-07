@@ -1,6 +1,6 @@
 import { RustIterator } from '..';
 
-export class DequeueVec<T> {
+export class VecDequeue<T> {
   length: number = 0;
   buffer: T[];
   head: number = 0;
@@ -79,24 +79,24 @@ export class DequeueVec<T> {
     return new RustIterator(this);
   }
 
-  static from<T>(arr: Array<T>): DequeueVec<T>;
+  static from<T>(arr: Array<T>): VecDequeue<T>;
   static from<T>(
     opt: { length: number },
     mapper?: (v: number, i: number) => T,
-  ): DequeueVec<T>;
+  ): VecDequeue<T>;
   static from<T>(
     optArr: { length: number } | Array<T>,
     mapper?: (v: number, i: number) => T,
-  ): DequeueVec<T> {
+  ): VecDequeue<T> {
     const buff =
       Array.isArray(optArr) ? optArr : (
         Array.from(optArr, (_, i) => mapper?.(i, i) ?? (undefined as T))
       );
-    return new DequeueVec<T>(buff);
+    return new VecDequeue<T>(buff);
   }
 }
 
-function* circularIterable<T>(d: DequeueVec<T>) {
+function* circularIterable<T>(d: VecDequeue<T>) {
   for (let i = 0; i < d.length; i++) {
     yield d.buffer[(d.head + i) % d.size];
   }
