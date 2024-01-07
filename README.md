@@ -766,7 +766,7 @@ for (let i = 0; i < 100; i++)
   array.push(i)
 ```
 
-#### API
+### Instance Methods
 
 The goal for this API, though not quite there now, is to implement the whole `Array` interface, as well as a few of the useful methods of the `VecDequeue` struct from Rust. When the two have differently named methods that do the same thing, the primary name is the `Array` method, though many will be aliased with a camelcase version of the Rust name.
 
@@ -789,7 +789,73 @@ Returns the value at `i` index.
 #### `get(i: number): T`
 
 > Alias of `at`
+
 #### `set(i: number, v: T): void`
 
 Sets a value to the `i` index.
 
+#### `push(v: T): void`
+
+> See `Array.push`
+
+Pushes a value into the `Vec` at the tail.
+
+This operation, performs a size check (by calling `grow`) before adding the value, in the event the buffer is full.
+
+#### `pop(): T | undefined`
+
+> See `Array.pop`
+
+Returns the value at the tail of the `Vec` removing it from the `Vec`, or `undefined` if none exists.
+
+
+#### `unshift(v: T): void
+
+> See `Array.unshift`
+
+Inserts a value to the `Vec` at the head.
+
+This operation, performs a size check (by calling `grow`) before adding the value, in the event the buffer is full.
+
+#### `shift(): T | undefined`
+
+> See `Array.shift`
+
+Returns the value at the head of the `Vec` removing it from the `Vec`, or `undefined` if none exists.
+
+#### `first(): T | undefined`
+
+Returns the value at the head of the `Vec`, or `undefined` if none exists.
+
+#### `last(): T | undefined`
+
+Returns the value at the tail of the `Vec`, or `undefined` if none exists.
+
+#### `grow(): void`
+
+> This is an internal method.
+
+Checks if the buffer is full. If so, increases the buffer size by 100%, and moves any wrapped tail elements into the extended memory space.
+
+#### `[@@iterator](): Iterator<T>`
+
+Returns an `Iterator` over the items in the `Vec`, appropriately wrapping around the circular buffer.
+
+Despite how the circular buffer, works, this has similar semantics to iterating over an array, in regards to if items are added and removed in the process. If you remove an item early in the list, the `Iterator` will appear to skip an item in its iteration.
+
+#### `toIter(): RustIterator<T>`
+
+Returns a `RustIterator` with the `Vec` as the upstream `Iterator`.
+
+### Static Methods
+
+#### `from<T>(arr: Array<T>): VecDequeue<T>`
+
+> See `Array.from`
+
+Creates a `VecDequeue` from an `Array`
+#### `from<T>(opt: { length: number }, mapper?: (v: number, i: number) => T): VecDequeue<T>
+
+> See `Array.from`
+
+Creates a `VecDequeue` of `opt.length` size by passing the 0-index into `mapper` for each item in the size.
