@@ -29,6 +29,7 @@ const isIterable = <T>(val: Iterable<T> | unknown): val is Iterable<T> => {
   return typeof val === 'object' && val !== null && Symbol.iterator in val;
 };
 export type depth = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-type Flatten<T, D extends depth> = D extends 0 ? T
-: T extends Iterable<infer U> ? Flatten<U, Dec[D]>
-: T;
+type Flatten<T, D extends depth> =
+  D extends 0 ? T
+  : T extends Iterable<infer U> ? Flatten<U, Dec[D]>
+  : T;
