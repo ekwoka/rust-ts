@@ -1,4 +1,4 @@
-import { RustIterator } from '..';
+import { RustIterator } from '../iterators/index.js';
 
 export class VecDequeue<T> {
   length: number = 0;
