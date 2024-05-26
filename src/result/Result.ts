@@ -1,5 +1,5 @@
-import { None } from '..';
 import { None as NoneType, Option, Some } from '../option/Option.js';
+import { None } from '../option/index.js';
 
 const ok = Symbol();
 const err = Symbol();
