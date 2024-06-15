@@ -1,3 +1,4 @@
+import { takeWhilePeek } from './Peekable/takeWhilePeek.js';
 import { arrayChunks, size } from './arrayChunks.js';
 import { chain } from './chain.js';
 import { cycle } from './cycle.js';
@@ -244,5 +245,8 @@ export class PeekableRustIterator<T> extends RustIterator<T> {
   }
   peekable(): PeekableRustIterator<T> {
     return this;
+  }
+  takeWhilePeek(f: (val: T) => boolean): RustIterator<T> {
+    return new RustIterator(takeWhilePeek(this, f));
   }
 }

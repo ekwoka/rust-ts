@@ -18,4 +18,5 @@ export { window } from './window.js';
 export { zip } from './zip.js';
 export { r, range } from './range.js';
 export { RustIterator, PeekableRustIterator } from './RustIterator.js';
+export { takeWhilePeek } from './Peekable/takeWhilePeek.js';
 export default RustIterator;
