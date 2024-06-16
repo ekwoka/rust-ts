@@ -1,3 +1,3 @@
-import { VecDequeue } from './VecDequeue.js';
+import { VecDequeue } from './VecDequeue.js'
 
-export { VecDequeue, VecDequeue as CircularBuffer };
+export { VecDequeue, VecDequeue as CircularBuffer }

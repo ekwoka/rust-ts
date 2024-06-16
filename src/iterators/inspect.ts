@@ -3,7 +3,7 @@ export function* inspect<T>(
   fn: (val: T) => void,
 ): IterableIterator<T> {
   for (const x of iter) {
-    fn(x);
-    yield x;
+    fn(x)
+    yield x
   }
 }

@@ -16,19 +16,17 @@
       "types": "./dist/upgrade/index.d.ts"
     }
   },
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist", "src"],
   "type": "module",
   "scripts": {
     "build": "tsc",
     "coverage": "vitest run --coverage",
-    "doctor": "run-s lint:check test:run build size",
-    "lint": "eslint --fix ./src ./test; prettier --write ./src ./test --experimental-ternaries",
-    "lint:check": "eslint --max-warnings 10 ./src && prettier --check ./src --experimental-ternaries",
+    "doctor": "run-s lint test:run build size",
+    "lint": "run-s lint:*",
+    "lint:biome": "biome check --write",
+    "lint:staged": "lint-staged",
     "prebuild": "rm -rf dist",
-    "prepare": "husky install",
+    "prepare": "husky",
     "size": "node scripts/esbuild.js",
     "test": "vitest",
     "test:run": "vitest run",
@@ -38,47 +36,22 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "4.3.0",
+    "@biomejs/biome": "1.8.1",
     "@types/node": "20.14.2",
-    "@typescript-eslint/eslint-plugin": "7.13.0",
-    "@typescript-eslint/parser": "7.13.0",
     "@vitest/coverage-c8": "0.32.2",
     "esbuild": "0.21.5",
-    "eslint": "8.56.0",
-    "eslint-plugin-filename-export": "1.0.4",
     "husky": "9.0.11",
     "lint-staged": "15.2.7",
     "npm-run-all2": "6.2.0",
-    "prettier": "3.3.2",
     "pretty-bytes": "6.1.1",
     "typescript": "5.4.5",
     "vite": "5.3.1",
     "vite-tsconfig-paths": "4.3.2",
     "vitest": "1.6.0"
   },
-  "prettier": {
-    "singleQuote": true,
-    "bracketSameLine": true,
-    "plugins": [
-      "@trivago/prettier-plugin-sort-imports"
-    ],
-    "importOrder": [
-      "node:.*",
-      "@/lib(.*)$",
-      "@/utils(.*)$",
-      "^[./]"
-    ],
-    "importOrderSeparation": true,
-    "importOrderSortSpecifiers": true
-  },
   "lint-staged": {
-    "*.{js,ts,mjs}": [
-      "eslint --fix",
-      "prettier --write --experimental-ternaries"
-    ],
-    "*.json": [
-      "prettier --write"
-    ]
+    "!(/)**/*.{ts,tsx,mjs}": "biome check --write",
+    "*.json": "biome check --write"
   },
   "pnpm": {
     "overrides": {
