@@ -50,8 +50,7 @@
     "vitest": "1.6.0"
   },
   "lint-staged": {
-    "!(/)**/*.{ts,tsx,mjs}": "biome check --write",
-    "*.json": "biome check --write"
+    "**/*.{ts,tsx,mjs,json,js}": "biome check --write"
   },
   "pnpm": {
     "overrides": {
