@@ -4,17 +4,108 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 jobs:
-  Test-PR:
+  cache-modules:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
+      - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2.2.4
+      - uses: pnpm/action-setup@v4.0.0
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: latest
+          standalone: true
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          pnpm store path
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: |
+            ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+            ${{ '**/node_modules' }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install Dependencies
+        shell: bash
+        run: pnpm i
+
+  Lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+      - name: Run Biome
+        run: biome ci
+
+  Test:
+    runs-on: ubuntu-latest
+    needs: [cache-modules]
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4.0.0
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: latest
+          standalone: true
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          pnpm store path
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Restore cached Modules
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+            ${{ '**/node_modules' }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install Dependencies
+        shell: bash
+        run: pnpm i
+
+      - name: Test
+        run: pnpm run test --run --reporter=verbose
+
+  Build:
+    runs-on: ubuntu-latest
+    needs: [cache-modules]
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4.0.0
         name: Install pnpm
         id: pnpm-install
         with:
@@ -23,28 +114,52 @@ jobs:
 
       - name: Get pnpm store directory
         id: pnpm-cache
+        shell: bash
         run: |
           pnpm store path
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
+      - name: Restore cached Modules
+        uses: actions/cache/restore@v4
         with:
           path: |
             ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-            node_modules
+            ${{ '**/node_modules' }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
       - name: Install Dependencies
+        shell: bash
         run: pnpm i
 
-      - name: Lint
-        run: pnpm run lint:check
+      - name: Build Package
+        run: pnpm run build
 
-      - name: Typecheck
-        run: pnpm exec tsc
+  check-success:
+    runs-on: ubuntu-latest
+    needs: [Lint, Test, Build]
+    if: success()
+    outputs:
+      was_successful: ${{ steps.check-success.outputs.was_successful }}
+    steps:
+      - name: Check if all jobs were successful
+        id: check-success
+        run: |
+          echo "was_successful=true" >> $GITHUB_OUTPUT
 
-      - name: Run Tests
-        run: pnpm run test --run --reporter=verbose
+  was-successful:
+    runs-on: ubuntu-latest
+    needs: [check-success]
+    if: always()
+    steps:
+      - name: Was Successful
+        run: |
+          passed="${{ needs.check-success.outputs.was_successful }}"
+          if [[ $passed == "true" ]]; then
+            echo "All checks passed"
+            exit 0
+          else
+            echo "Check(s) failed"
+            exit 1
+          fi

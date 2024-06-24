@@ -1,2 +1,2 @@
-import './JSON';
-import './Response';
+import './JSON'
+import './Response'
