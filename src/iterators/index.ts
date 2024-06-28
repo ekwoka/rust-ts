@@ -1,6 +1,6 @@
 import { RustIterator } from './RustIterator.js'
 
-export { arrayChunks, size } from './arrayChunks.js'
+export { arrayChunks } from './arrayChunks.js'
 export { chain } from './chain.js'
 export { cycle } from './cycle.js'
 export { enumerate } from './enumerate.js'

@@ -1,5 +1,5 @@
 import { takeWhilePeek } from './Peekable/takeWhilePeek.js'
-import { arrayChunks, size } from './arrayChunks.js'
+import { arrayChunks } from './arrayChunks.js'
 import { chain } from './chain.js'
 import { cycle } from './cycle.js'
 import { enumerate } from './enumerate.js'
@@ -107,7 +107,7 @@ export class RustIterator<T> implements IterableIterator<T> {
     return [...this]
   }
 
-  arrayChunks<N extends size = 1>(size: N) {
+  arrayChunks<N extends number>(size: N) {
     return new RustIterator(arrayChunks<T, N>(this, size))
   }
 
@@ -165,7 +165,7 @@ export class RustIterator<T> implements IterableIterator<T> {
     return new RustIterator(flatMap(this, mapper))
   }
 
-  window<S extends size = 1>(n: S) {
+  window<S extends number>(n: S) {
     return new RustIterator(window<T, S>(this, n))
   }
 

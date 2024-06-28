@@ -1,6 +1,6 @@
-import { ChunkedArray, size } from './arrayChunks'
+import { ChunkedArray } from './arrayChunks'
 
-export function* window<T, S extends size = 1>(iter: Iterable<T>, size: S) {
+export function* window<T, S extends number>(iter: Iterable<T>, size: S) {
   let buffer: T[] = []
   for (const x of iter) {
     if (buffer.length === size) buffer = buffer.slice(1)
