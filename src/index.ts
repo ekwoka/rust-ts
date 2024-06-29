@@ -1,6 +1,5 @@
 export {
   arrayChunks,
-  size,
   chain,
   cycle,
   enumerate,

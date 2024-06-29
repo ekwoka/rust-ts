@@ -4,5 +4,6 @@ export function* takeWhilePeek<T>(
   peekable: PeekableRustIterator<T>,
   predicate: (value: T) => boolean,
 ): Generator<T> {
-  while (predicate(peekable.peek().value)) yield peekable.next().value
+  while (!peekable.peek().done && predicate(peekable.peek().value))
+    yield peekable.next().value
 }

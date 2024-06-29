@@ -1,6 +1,4 @@
-import { Dec } from '../types/utils'
-
-export function* arrayChunks<T, N extends size = 1>(
+export function* arrayChunks<T, N extends number>(
   iter: Iterable<T>,
   size?: N,
 ): Generator<ChunkedArray<T, N>, void, undefined> {
@@ -15,7 +13,6 @@ export function* arrayChunks<T, N extends size = 1>(
   if (chunk.length) yield chunk as ChunkedArray<T, N>
 }
 
-export type size = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
-export type ChunkedArray<T, N extends size = 1> = N extends 0
-  ? []
-  : [T, ...ChunkedArray<T, Dec[N]>]
+export type ChunkedArray<T, N extends number> =
+  | (Array<T> & { length: N })
+  | never
