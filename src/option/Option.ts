@@ -32,11 +32,11 @@ export class Some<T> implements Option<T> {
   constructor(val: T) {
     this.val = val
   }
-  isSome(): true {
+  isSome(): this is Some<T> {
     return true
   }
 
-  isNone(): false {
+  isNone(): this is None {
     return false
   }
   unwrap(): T {
@@ -86,10 +86,10 @@ export class Some<T> implements Option<T> {
 
 export class None implements Option<never, none> {
   val: never = null as never
-  isSome(): false {
+  isSome(): this is Some<never> {
     return false
   }
-  isNone(): true {
+  isNone(): this is None {
     return true
   }
   unwrap(): never {
