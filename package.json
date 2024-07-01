@@ -25,6 +25,7 @@
     "lint": "run-s lint:*",
     "lint:biome": "biome check --write",
     "lint:staged": "lint-staged",
+    "lint:check": "biome check",
     "prebuild": "rm -rf dist",
     "prepare": "husky",
     "size": "node scripts/esbuild.js",
