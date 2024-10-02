@@ -110,6 +110,16 @@ export class RustIterator<T> implements IterableIterator<T> {
     return [...this]
   }
 
+  into(
+    this: RustIterator<[unknown, unknown]>,
+    container: typeof Map,
+  ): T extends [infer K, infer V] ? Map<K, V> : never
+  into(this: RustIterator<unknown>, container: typeof Set): Set<T>
+  into(container: typeof Set | typeof Map) {
+    /** @ts-expect-error */
+    return new container(this)
+  }
+
   arrayChunks<N extends number>(size: N) {
     return new RustIterator(arrayChunks<T, N>(this, size))
   }
