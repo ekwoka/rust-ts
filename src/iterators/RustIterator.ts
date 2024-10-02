@@ -40,6 +40,9 @@ export class RustIterator<T> implements IterableIterator<T> {
   [Symbol.iterator](): IterableIterator<T> {
     return this
   }
+  iter() {
+    return this
+  }
 
   /**
    * Is this iterator capable of yielding new values.
