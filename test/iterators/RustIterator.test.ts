@@ -33,12 +33,29 @@ describe('consumption methods', () => {
     expect(iter.next()).toEqual({ value: 3, done: false })
     expect(iter.next()).toEqual({ value: undefined, done: true })
   })
-  describe('.collect', () => {
+  describe('.collect/.into', () => {
     it('collects into an array', () => {
       const iter = new RustIterator([1, 2, 3])
       expect(iter.collect()).toEqual([1, 2, 3])
     })
+    it('collects into a Set', () => {
+      const iter = new RustIterator([1, 2, 3])
+      expect(iter.into(Set)).toEqual(new Set([1, 2, 3]))
+    })
+    it('collects into a Map', () => {
+      const iter = new RustIterator([
+        ['foo', 'bar'],
+        ['hello', 'world'],
+      ])
+      expect(iter.into(Map)).toEqual(
+        new Map([
+          ['foo', 'bar'],
+          ['hello', 'world'],
+        ]),
+      )
+    })
   })
+
   it('.nextChunk', () => {
     const iter = new RustIterator([1, 2, 3, 4, 5, 6, 7, 8])
     expect(iter.nextChunk(2)).toEqual({ value: [1, 2], done: false })

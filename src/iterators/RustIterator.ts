@@ -35,9 +35,18 @@ export class RustIterator<T> implements IterableIterator<T> {
   /**
    * To implement the Iterable. Returns Self (to be IterableIterator).
    * This allows for RustIterator to be used in for-of loops, and be spread easily.
-   * @returns {IterableIterator<T>}
+   * @returns {RustIterator<T>}
    */
-  [Symbol.iterator](): IterableIterator<T> {
+  [Symbol.iterator](): RustIterator<T> {
+    return this
+  }
+
+  /**
+   * To implement the Extended Iterable. Returns Self (to be IterableIterator).
+   * This allows for RustIterator to be used in for-of loops, and be spread easily.
+   * @returns {RustIterator<T>}
+   */
+  iter() {
     return this
   }
 
@@ -105,6 +114,20 @@ export class RustIterator<T> implements IterableIterator<T> {
 
   collect(): T[] {
     return [...this]
+  }
+
+  into(
+    this: RustIterator<[unknown, unknown] | readonly [unknown, unknown]>,
+    container: typeof Map,
+  ): T extends [infer K, infer V]
+    ? Map<K, V>
+    : T extends readonly [infer K, infer V]
+      ? Map<K, V>
+      : never
+  into(this: RustIterator<unknown>, container: typeof Set): Set<T>
+  into(container: typeof Set | typeof Map) {
+    /** @ts-expect-error - Doesn't like differing Map and Set signatures */
+    return new container(this)
   }
 
   arrayChunks<N extends number>(size: N) {
