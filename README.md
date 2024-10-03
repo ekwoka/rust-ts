@@ -32,6 +32,7 @@ Since these two do serve somewhat similar purposes, they also have fairly simila
 ### Result Variants
 
 The `Result<T,E>` type is made up of two variants:
+
 - `Ok<T>`: Indicates the action was successful, and contains the proper return value
 - `Err<E>`: Indicates the action was not successful, and contains the error encountered.
 
@@ -39,8 +40,8 @@ A function can return a `Result<T,E>` type and then return both of these differe
 
 ```ts
 return decrypt(data)
-	.map(item => ({ statusCode: 200, body: item }))
-	.unwrapOrElse(error => ({ statusCode: 500, body: error }))
+  .map((item) => ({ statusCode: 200, body: item }))
+  .unwrapOrElse((error) => ({ statusCode: 500, body: error }));
 ```
 
 Here, `decrypt` returns a `Result` that indicates if the data could be properly decrypted, or an error if it fails to decrypt, and then the success condition and the error condition can be handled expressively to conform them into the same shape object, without needing statements or other behaviors.
@@ -49,10 +50,10 @@ This can be chained near endlessly, allowing a focus on the happy path, and defe
 
 ```ts
 return decrypt(data)
-	.andThen(JSON.tryParse)
-	.andThen(Item.tryFrom)
-	.map(item => ({ statusCode: 200, body: item }))
-	.unwrapOrElse(error => ({ statusCode: 500, body: error }))
+  .andThen(JSON.tryParse)
+  .andThen(Item.tryFrom)
+  .map((item) => ({ statusCode: 200, body: item }))
+  .unwrapOrElse((error) => ({ statusCode: 500, body: error }));
 ```
 
 Here, similar to before, `decrypt` returns a `Result`, but now we pass the `Ok` values into other functions that also return `Result` variants (`JSON.tryParse` and `Item.tryFrom`). If `decrypt` is `Ok` then we try to parse it as JSON, if that is `Ok`, we try to validate it as an `Item`, and if that is okay, we return a `200` status.
@@ -66,19 +67,20 @@ Naturally, this makes a ton of sense to those familiar with Rust.
 ### Option Variants
 
 The `Option<T>` type is made up of two variants:
+
 - `Some<T>`: Indicates the presence of a value
 - `None`: Indicates the lack of a value
 
 This is similar to the `Result` variants, but instead of indicating success and error states, indicates the presence of a value or lack of a value. For example:
 
 ```ts
-getUser(userID)
+getUser(userID);
 ```
 
 Is the id not matching to a user an error? Not really. Any kind of `find` action, something not being found is quite different from there being an error in the process of searching. So you can return an `Option` to indicate, in this case, the specified user may or may not exist.
 
 ```ts
-return getUser(userID).orElse(createUser)
+return getUser(userID).orElse(createUser);
 ```
 
 Here, we can get the user, or create it if it doesn't exist already, all in an expression that allows focusing on the happy path
@@ -88,25 +90,23 @@ Here, we can get the user, or create it if it doesn't exist already, all in an e
 To use the `Result` and `Option` enums, you can simply import their appropriate Variant for your case and instantiate it as a class (except for `None` which is already instantiated as a constant instance)
 
 ```ts
-import { Ok, Err } from '@ekwoka/rust-ts'
+import { Ok, Err } from '@ekwoka/rust-ts';
 
 export const tryParseJSON = (data: string) => {
   // to handle thrown exceptions from native methods
   try {
-  
     // if successful will return an `Ok`
-    return new Ok(JSON.parse(data))
-    
+    return new Ok(JSON.parse(data));
   } catch (e) {
-  
     // if an error was thrown, will return an `Err`
-    return new Err(e) 
+    return new Err(e);
   }
-}
-
+};
 
 // attempts to parse and logs the hello key to the console if it exists. Does nothing on an error
-tryParseJSON('{"hello":"world"}').map(data => data.hello).andThen(console.log)
+tryParseJSON('{"hello":"world"}')
+  .map((data) => data.hello)
+  .andThen(console.log);
 ```
 
 While this pattern would allow your own methods to return `Err` and you can handle them and do transformations and pass back the modified `Result`, we would need to wrap other things that might `throw` exceptions to catch and convert them to `Err`.
@@ -141,10 +141,10 @@ In systems level languages`null` is different than what it is in JavaScript (it'
 To handle typing function signatures that return `Result` and `Option` types, you can import the `type` and use it in the type signature.
 
 ```ts
-import type { Result, Option } from '@ekwoka/rust-ts'
+import type { Result, Option } from '@ekwoka/rust-ts';
 
-declare const tryParse = (data: string) => Result<unknown, SyntaxError>
-declare const getUser = (userId: string) => Option<User>
+declare const tryParse = (data: string) => Result<unknown, SyntaxError>;
+declare const getUser = (userId: string) => Option<User>;
 ```
 
 Naturally, `Ok<T>` and `Err<E>` implement `Result<T,E>` and `Some<T>` and `None` implement `Option<T>`
@@ -154,6 +154,7 @@ Naturally, `Ok<T>` and `Err<E>` implement `Result<T,E>` and `Some<T>` and `None`
 These two structs are very similar in their APIs. They mostly feature the same methods, with almost matching semantics, but can vary slightly. This guide to the Methods will go over the methods once as if it is a single struct, and present the signatures for each, and any accompanying differences between the two where they exist.
 
 Shared methods will be presented first, and struct specific will be at the end.
+
 #### `constructor<T>(value: T)`
 
 The constructors for these are all quite simple. They take in a value (for `Ok` and `Some`) or error (for `Err`) and store it internally, returning the object.
@@ -168,10 +169,10 @@ It is recommended to use `expect` instead of `unwrap` in many cases (or one of t
 
 #### `unwrapOr(defaultValue: T): T`
 
-This returns the inner value for `Ok<T>` and `Some<T>` and otherwise returns the provided value in the case of `None` or `Err`. 
-
+This returns the inner value for `Ok<T>` and `Some<T>` and otherwise returns the provided value in the case of `None` or `Err`.
 
 #### `unwrapOrElse(op: (error: E) => T): T` (`Result`)
+
 #### `unwrapOrElse(op: () => T): T` (`Option`)
 
 Returns the inner value for `Ok<T>` and `Some<T>`, and otherwise calls the passed in callback and returns its value for `Err` and `None` types. When a `Result` is `Err`, the `Err` is passed to the callback.
@@ -187,12 +188,13 @@ Returns the inner value for `Ok<T>` and `Some<T>`. Otherwise throws an exception
 This is, code wise, almost exactly the same as `unwrap`, and the semantic distinction is that the `message` value can inform other developers why the code is unsafely accessing the inner value.
 
 ```ts
-const config = readFile('./config.toml').expect('Config file must be present for application to run')
+const config = readFile('./config.toml').expect('Config file must be present for application to run');
 ```
 
 The passed in message is a part of the exception thrown, but the message is not meant to be an error message. It is meant to explain why the unwrapping of the value should be safe. Think `this value is safe because <MESSAGE>`.
 
 #### `andThen<U>(op: (value: T) => U): U | Err<E>` (`Result`)
+
 #### `andThen<U>(op: (value: T) => U): U | None` (`Option`)
 
 Calls the passed in callback with the inner value for `Ok<T>` and `Some<T>` types returning that callbacks return value, otherwise simply returns `this` for `Err` and `None` types.
@@ -200,19 +202,20 @@ Calls the passed in callback with the inner value for `Ok<T>` and `Some<T>` type
 This can be useful for performing a final action on valid types without unwrapping them, or to help with flattening values. For instance, passing an `Ok` inner value to another function that returns a `Result`, using `andThen` will prevent you from ending up `Result<<Result<T,E>, E2>` value.
 
 #### `orElse<U>(op: (E) => U): U | Ok<T>` (`Result`)
+
 #### `orElse<U>(op: () => U): U | Some<T>` (`Option`)
 
 Similar to `andThen` but operates on `Err` and `None` values, calling the callback, and returning it's return type, or the `Ok` / `Some` variant.
 
 #### `map<U>(op: (value: T) => U): Result<U, E>`
+
 #### `map<U>(op: (value: T) => U): Option<U>`
 
-Passes the inner value to the callback and uses the returned value as the inner value of a new struct for `Ok<T>` and `Some<T>` variants, and does nothing with `Err` and `None` variants. 
+Passes the inner value to the callback and uses the returned value as the inner value of a new struct for `Ok<T>` and `Some<T>` variants, and does nothing with `Err` and `None` variants.
 
 This, among the other methods, indicates that `Result` and `Option` structs are Monads, that wrap an inner value and allow performing operations based on their internal values returning other structs of the same or similar types.
 
 This is not unlike how `Promise` work in JavaScript, where `.then` and `.catch` operate on the resolved or rejected values of one `Promise` and return another `Promise` with a new inner value.
-
 
 #### `mapErr<U>(op: (error: E) => U): Result<T, U>` (`Result` only)
 
@@ -306,7 +309,7 @@ Returns the next yielded value from the iterator as an `IteratorResult<T>`. This
 ```ts
 interface IteratorResult<T> {
   done: boolean;
-  value: T | undefined
+  value: T | undefined;
 }
 ```
 
@@ -321,7 +324,7 @@ Allows introspecting into whether the `Iterator` is capable of yielding new valu
 
 Returns itself, as an `Iterator`.
 
-This method, called with the well-known `Symbol` `@@iterator` is used internally when doing `Array` destructuring, spreading, or `for..of` looping over `Iterable` objects. This is all that is needed to implement the `Iterable` abstract interface. 
+This method, called with the well-known `Symbol` `@@iterator` is used internally when doing `Array` destructuring, spreading, or `for..of` looping over `Iterable` objects. This is all that is needed to implement the `Iterable` abstract interface.
 
 In this case, the method simply returns the same `RustIterator` instance it is called on, not a distinct object.
 
@@ -338,6 +341,7 @@ Creating a `RustIterator` from an upstream `RustIterator` will return a new `Rus
 #### `nextChunk(n: number): IteratorResult<T[]>`
 
 Returns an `IteratorResult` of an `Array` containing the next `n` values from the `Iterator`. If the `Iterator` yields less than `n` values, the `IteratorResult` will be marked `done` and only include all those values yielded up to `n`. There is no guarantee in this method that `n` values will be returned, just that no more than `n` will be returned.
+
 ### `new PeekableRustIterator<T>(upstream: Iteratable<T>)`
 
 `PeekableRustIterator` is a special kind of `RustIterator` that enables special behavior to allow you to inspect the next value to be yielded by `next`, without consuming the `Iterator`.
@@ -377,6 +381,14 @@ All of the methods in this group consume the `Iterator`, partially or in full, p
 
 Probably the most important `Consuming` method, `collect` consumes the `Iterator` and places all of the values into an `Array`. Very useful for passing the values out to things that need `Array` or storing an intermediary collection of the values, to allow multiple iterations.
 
+#### `into(this: RustIterator<[K, V]>,container: typeof Map): Map<K, V>`
+
+#### `into(this: RustIterator<T>, container: typeof Set): Set<T>`
+
+For convenience when wanting to collect the Iterator into a different collection type, you can use `into` to collect the values into a `Map` or `Set`. Just pass the `Map` or `Set` constructor as the first argument.
+
+> Trying to pass `Map` to `into` when the Iterator type is not a `[Key, Value]` tuple will result in a type error.
+
 #### `forEach(f: (val: T) => void): void`
 
 > See `Array.forEach`
@@ -409,7 +421,7 @@ The value returned from each calling of `fn` is passed as the first argument (`a
 
 Consumes the `Iterator`, adding the values together (with the `+` operator), returning the final value (a summed `number` or `bigint` or a concatenated `string`)
 
-This will only have predictable results on `string`, `number` and `bigint` type `Iterator`.  Other primitives and objects can have unpredictable and not type safe results.
+This will only have predictable results on `string`, `number` and `bigint` type `Iterator`. Other primitives and objects can have unpredictable and not type safe results.
 
 #### `max(): T | undefined where T = number | bigint | string`
 
@@ -417,7 +429,7 @@ This will only have predictable results on `string`, `number` and `bigint` type 
 
 Returns the maximum value (with the `>` operator) yielded by the `Iterator`.
 
-This will only have predictable results on `string`, `number` and `bigint` type `Iterator`.  Other primitives and objects can have unpredictable and not type safe results.
+This will only have predictable results on `string`, `number` and `bigint` type `Iterator`. Other primitives and objects can have unpredictable and not type safe results.
 
 > `string` values will be sorted by the first `codepoint` that differs between two `string` values, with later `codepoint` being returned. Characters that are made of multiple `codepoint` are treated as two separate `codepoint`. This mainly applies to non-English texts and Emojis.
 
@@ -427,10 +439,9 @@ This will only have predictable results on `string`, `number` and `bigint` type 
 
 Returning the minimum value (with the `<` operator) yielded by the `Iterator`.
 
-This will only have predictable results on `string`, `number` and `bigint` type `Iterator`.  Other primitives and objects can have unpredictable and not type safe results.
+This will only have predictable results on `string`, `number` and `bigint` type `Iterator`. Other primitives and objects can have unpredictable and not type safe results.
 
 > `string` values will be sorted by the first `codepoint` that differs between two `string` values, with earlier `codepoint` being returned. Characters that are made of multiple `codepoint` are treated as two separate `codepoint`. This mainly applies to non-English texts and Emojis.
-
 
 #### `find(checker: (item: T) => unknown): T | null`
 
@@ -486,7 +497,6 @@ Advances the `Iterator` `n` steps consuming those values.
 
 Returns the `nth` value yielded by the `Iterator`. If the `Iterator` becomes `done` before `n` values, returns `undefined`
 
-
 ### Iterating Methods
 
 All of the following methods return a new `RustIterator` without consuming any values of the previous. This new `Iterator` will yield transformed, filtered, or other modified values of the previous `Iterator`.
@@ -513,7 +523,6 @@ Will continue to yield values until a value, when passed to `f` returns a `falsy
 
 > Will not yield the first value that returns `falsy`, but it will consume that value from the upstream `Iterator`.
 
-
 #### `stepBy(n: number): RustIterator<T>`
 
 Will yield only ever `nth` value from the upstream `Iterator`.
@@ -536,10 +545,10 @@ Yields every value as is, but first passes the value to `fn`.
 
 This allows accessing the value, primarily for debugging purposes, expressively in the method chain.
 
-The most simple use is with `console.log` 
+The most simple use is with `console.log`
 
 ```ts
-iter.inspect(console.log).filter(Boolean).inspect(console.log).collect()
+iter.inspect(console.log).filter(Boolean).inspect(console.log).collect();
 ```
 
 #### `scan<A = T, R = T>(fn: (state: [A], val: T) => R, initial: A): RustIterator<R>`
@@ -547,7 +556,6 @@ iter.inspect(console.log).filter(Boolean).inspect(console.log).collect()
 Yields the result of passing the value to `fn`.
 
 `fn` is also passed a tuple of `initial` as the starting `state`, and continues to pass that same `state` as an argument to each calling of `fn`. When you mutate `state`, this allows you to iterate while maintaining some kind of internal "memory" to the iteration, so it can have some sense of the past.
-
 
 #### `flat<D extends depth = 1>(depth?: D)`
 
@@ -558,7 +566,6 @@ Yields the individual values yielded by flattening the value (`where T = Iterabl
 This can allow multiple `Iterable` to be combined, to iteratively iterate over each successive `Iterable`.
 
 > For this purpose, only `Iterable` objects will be flattened. `string`, while `Iterable`, will not be flattened into individual characters or `codepoint`.
-
 
 #### `flatMap<S>(mapper: (val: T) => S)`
 
@@ -584,7 +591,7 @@ These methods don't cleanly fit into the above groups of methods. At this time, 
 
 Individually yields all the values of `other` AFTER consuming all of the upstream `Iterator`.
 
-#### `zip<S = T>(other: Iterable<S>): RustIterator<[T, S]>
+#### `zip<S = T>(other: Iterable\<S\>): RustIterator<[T, S]>
 
 Successively yields a tuple of the next values of both the upstream `Iterator` and `other`.
 
@@ -594,7 +601,7 @@ This is useful for merging values together as pairs automatically.
 
 Repeatedly yields each individual value of the upstream `Iterator` forever, resulting in an `Iterator` that can never be `done`.
 
-> As this requires storing all yielded values in memory, for large datasets, this means a lot of memory. 
+> As this requires storing all yielded values in memory, for large datasets, this means a lot of memory.
 
 As the returned `Iterator` can NEVER end, `Consuming` methods could result in a blocked thread, if there have not been additional methods that limit the length of the `Iterator` (like `take`, `takeWhile`, `find`) that will eventually fuse the `Iterator`.
 
@@ -604,7 +611,7 @@ As the returned `Iterator` can NEVER end, `Consuming` methods could result in a 
 
 Yields each value of the upstream `Iterator`, after sorting the values through `compare`.
 
-> By default this uses a `lexigraphicCompare` sort when no `compare` is passed. This emulates the native behavior of `Array.sort`, although mixed arrays of `number | string` can have strange results, as this will not turn all `number` to `string` when sorting. 
+> By default this uses a `lexigraphicCompare` sort when no `compare` is passed. This emulates the native behavior of `Array.sort`, although mixed arrays of `number | string` can have strange results, as this will not turn all `number` to `string` when sorting.
 > It is recommended to provide your own `compare` any time you have values that are not strictly `number | bigint`.
 
 To accomplish this, the upstream `Iterator` is completely consumed and stored in memory, immediately upon calling this method, even if the returned `RustIterator` has not yielded any values.
@@ -618,7 +625,7 @@ As values are yielded, the internal storage of values is reduced in memory.
 While Bubble Sort can increase total comparisons when needing to sort the entire list, it works nicely for this use case, as it doesn't prematurely sort any sub arrays while producing the next value. This is ideal for the purpose of an `Iterator` where you do as little work as possible until it is finally needed, and where not all values will actually need to be sorted, as in the following example.
 
 ```ts
-const lowestThreePrices = prices.sort().take(3).collect()
+const lowestThreePrices = prices.sort().take(3).collect();
 ```
 
 While this will `collect` all of the `prices`, it will only sort out the lowest three values, discarding the remaining unsorted values.
@@ -663,7 +670,7 @@ The answer is in how `Array` use the memory they are given.
 
 Typically, at the System level, lists that can be of a dynamic length. They will start with some initial size (commonly `0`) and as items are added, more memory is allocated to them, and when these allocations happen, the `Array` is moved around in memory to where it can have a single contiguous block of memory.
 
-When items are removed, the allocated space is *not* reduced. Instead the `Array` still occupies that space, even with no values. In JavaScript, during garbage collection, the `Array` may be moved, and the memory resized.
+When items are removed, the allocated space is _not_ reduced. Instead the `Array` still occupies that space, even with no values. In JavaScript, during garbage collection, the `Array` may be moved, and the memory resized.
 
 The basic thing to understand is that the space in memory is fixed (when not growing).
 
@@ -675,7 +682,7 @@ Well, that's how a `VecDequeue` works!!! When an item is removed from the front,
 
 Now, just doing that, and marching the memory along would be impractical. If we just keep pushing memory to the tail and adjusting the head back, we could end up with a memory space that is many gigabytes in size, but containing little real data! That's a horrible memory leak!
 
-`VecDequeue` in Rust, and this `VecDequeue` in this package both handle this issue by having the memory instead be a `Circular Buffer` (which is why `VecDequeue` is exported under the alias `CircularBuffer` as well). In a `Circular Buffer` all of the list items are stored in order (as opposed to a `Linked List` that would store them scattered in memory), but the memory space is treated as being *circular* - that is, the next item after the one stored at the end of memory is at the beginning of the memory.
+`VecDequeue` in Rust, and this `VecDequeue` in this package both handle this issue by having the memory instead be a `Circular Buffer` (which is why `VecDequeue` is exported under the alias `CircularBuffer` as well). In a `Circular Buffer` all of the list items are stored in order (as opposed to a `Linked List` that would store them scattered in memory), but the memory space is treated as being _circular_ - that is, the next item after the one stored at the end of memory is at the beginning of the memory.
 
 As items are added and removed, the offsets for the head and tail are moved around, modifying data, but leaving everything in place. When the tail wraps all the way around to the head, we increase the total memory, and do a quick shifting of the wrapped portion of the tail to be contiguous with the head portion in the new memory space.
 
@@ -685,36 +692,35 @@ This means we do still sometimes move items around in memory, but only as the bu
 
 In a typical `Array`, these operations would look like this:
 
-> `empty` is used here to refer to a spot in the list *in memory* that does not have a value. It may or may not be viewable when logging an `Array` as normally that only shows `empty` known items, not in memory space.
+> `empty` is used here to refer to a spot in the list _in memory_ that does not have a value. It may or may not be viewable when logging an `Array` as normally that only shows `empty` known items, not in memory space.
 
 > Multiple lines of comments are used to indicate the internal steps the list may use to ahndle the code action
 
 ```ts
+const array = new Array(3); // [empty, empty, empty]
 
-const array = new Array(3) // [empty, empty, empty]
+array.push(1); // [1, empty, empty]
 
-array.push(1) // [1, empty, empty]
+array.push(2); // [1, 2, empty]
 
-array.push(2) // [1, 2, empty]
+array.push(3); // [1, 2, 3]
 
-array.push(3) // [1, 2, 3]
+array.shift();
+// | [empty, 2, 3]
+// | [2, empty, 3]
+// | [2, 3, empty]
 
-array.shift()
-  // | [empty, 2, 3]
-  // | [2, empty, 3]
-  // | [2, 3, empty]
+array.push(4); // [2, 3, 4]
 
-array.push(4) // [2, 3, 4]
+array.shift();
+// | [empty, 3, 4]
+// | [3, empty, 4]
+// | [3, 4, empty]
 
-array.shift()
-  // | [empty, 3, 4]
-  // | [3, empty, 4]
-  // | [3, 4, empty]
-
-array.unshift(5)
-  // | [3, empty, 4]
-  // | [empty, 3, 4]
-  // | [5, 3, 4]
+array.unshift(5);
+// | [3, empty, 4]
+// | [empty, 3, 4]
+// | [5, 3, 4]
 ```
 
 Naturally, this gets worse and worse! While `push` and `pop` are `O(1)`, `shift` and `unshift` are both `O(n)`!!
@@ -722,21 +728,21 @@ Naturally, this gets worse and worse! While `push` and `pop` are `O(1)`, `shift`
 Okay, so how does a `Circular Buffer` work?
 
 ```ts
-const array = new CicularBuffer(3) // [empty, empty, empty]
+const array = new CicularBuffer(3); // [empty, empty, empty]
 
-array.push(1) // [1, empty, empty]
+array.push(1); // [1, empty, empty]
 
-array.push(2) // [1, 2, empty]
+array.push(2); // [1, 2, empty]
 
-array.push(3) // [1, 2, 3]
+array.push(3); // [1, 2, 3]
 
-array.shift() // [empty, 2, 3]
+array.shift(); // [empty, 2, 3]
 
-array.push(4) // [4, 2, 3]
+array.push(4); // [4, 2, 3]
 
-array.shift() // [4, empty, 3]
+array.shift(); // [4, empty, 3]
 
-array.unshift(5)  // [4, 5, 3]
+array.unshift(5); // [4, 5, 3]
 ```
 
 Back to just `O(1)` updates!!
@@ -747,7 +753,7 @@ In the benchmarks (in this repo run `pnpm exec vitest bench`), we see that the p
 
 - As a **Queue** (`push` to tail, `shift` from head): `VecDequeue` performs **4.7x** faster than `Array`
 - As a **Stack** (`push` to tail, `pop` from tail): `Array` performs **1.1x** faster than `VecDequeue`
-- With **only head** (`unshift` to head, `shift` from head): `VecDequeue` performs ***17x*** faster than `Array`
+- With **only head** (`unshift` to head, `shift` from head): `VecDequeue` performs **_17x_** faster than `Array`
 
 These will of course depend, in reality, on how many operations, the distribution of those operations, and the size of the list. There were some situations where `VecDequeue` even out performed `Array` as a `Stack`.
 
@@ -758,12 +764,11 @@ So, `Stack` use cases may still benefit from just being a native `Array`, other 
 Using a `VecDequeue` is very similar to using an `Array`, we just don't get the nice literal syntax.
 
 ```ts
-import { VecDequeue } from '@ekwoka/rust-ts'
+import { VecDequeue } from '@ekwoka/rust-ts';
 
-const array = new VecDequeue()
+const array = new VecDequeue();
 
-for (let i = 0; i < 100; i++)
-  array.push(i)
+for (let i = 0; i < 100; i++) array.push(i);
 ```
 
 ### Instance Methods
@@ -771,6 +776,7 @@ for (let i = 0; i < 100; i++)
 The goal for this API, though not quite there now, is to implement the whole `Array` interface, as well as a few of the useful methods of the `VecDequeue` struct from Rust. When the two have differently named methods that do the same thing, the primary name is the `Array` method, though many will be aliased with a camelcase version of the Rust name.
 
 #### `new VecDequeue<T>(initializer: Array<T> | number = 0)`
+
 #### `new CircularBuffer<T>(initializer: Array<T> | number = 0)`
 
 The class is exported under both `VecDequeue` and `CircularBuffer` for convenience. It's the exact same thing.
@@ -784,7 +790,6 @@ When the `initializer` is a `number` (or nothing, defaulting to `0`), The `Vec` 
 Returns the value at `i` index.
 
 > This is not the index within the internal buffer, but the 0-index from the head as it wraps around the circular buffer
-
 
 #### `get(i: number): T`
 
@@ -807,7 +812,6 @@ This operation, performs a size check (by calling `grow`) before adding the valu
 > See `Array.pop`
 
 Returns the value at the tail of the `Vec` removing it from the `Vec`, or `undefined` if none exists.
-
 
 #### `unshift(v: T): void
 
@@ -854,8 +858,37 @@ Returns a `RustIterator` with the `Vec` as the upstream `Iterator`.
 > See `Array.from`
 
 Creates a `VecDequeue` from an `Array`
+
 #### `from<T>(opt: { length: number }, mapper?: (v: number, i: number) => T): VecDequeue<T>
 
 > See `Array.from`
 
 Creates a `VecDequeue` of `opt.length` size by passing the 0-index into `mapper` for each item in the size.
+
+## `Prelude`
+
+There are many places it might be useful to extend the standard library types with simple methods to convert them to these types. For convenience, you can import the prelude, which will extend the native structs with new methods
+
+```ts
+import `@ekwoka/rust-ts/prelude`
+```
+
+Currently, this only adds `iter(): RustIterator<T>` to the following classes:
+
+- `Array`
+- `String` (over individual characters)
+- `Set`
+- `Map` (over key value pairs)
+- `Generator`
+- `Iterator`
+
+This makes it easy to create `RustIterator` instances.
+
+```ts
+const values = [1, 2, 3, 2, 1];
+const unique = values.iter().into(Set).iter().collect();
+
+assert(unique.length === 3);
+```
+
+> The above example code is stupid to prove a point
