@@ -381,6 +381,14 @@ All of the methods in this group consume the `Iterator`, partially or in full, p
 
 Probably the most important `Consuming` method, `collect` consumes the `Iterator` and places all of the values into an `Array`. Very useful for passing the values out to things that need `Array` or storing an intermediary collection of the values, to allow multiple iterations.
 
+#### `into(this: RustIterator<[K, V]>,container: typeof Map): Map<K, V>`
+
+#### `into(this: RustIterator<T>, container: typeof Set): Set<T>`
+
+For convenience when wanting to collect the Iterator into a different collection type, you can use `into` to collect the values into a `Map` or `Set`. Just pass the `Map` or `Set` constructor as the first argument.
+
+> Trying to pass `Map` to `into` when the Iterator type is not a `[Key, Value]` tuple will result in a type error.
+
 #### `forEach(f: (val: T) => void): void`
 
 > See `Array.forEach`
@@ -856,3 +864,31 @@ Creates a `VecDequeue` from an `Array`
 > See `Array.from`
 
 Creates a `VecDequeue` of `opt.length` size by passing the 0-index into `mapper` for each item in the size.
+
+## `Prelude`
+
+There are many places it might be useful to extend the standard library types with simple methods to convert them to these types. For convenience, you can import the prelude, which will extend the native structs with new methods
+
+```ts
+import `@ekwoka/rust-ts/prelude`
+```
+
+Currently, this only adds `iter(): RustIterator<T>` to the following classes:
+
+- `Array`
+- `String` (over individual characters)
+- `Set`
+- `Map` (over key value pairs)
+- `Generator`
+- `Iterator`
+
+This makes it easy to create `RustIterator` instances.
+
+```ts
+const values = [1, 2, 3, 2, 1];
+const unique = values.iter().into(Set).iter().collect();
+
+assert(unique.length === 3);
+```
+
+> The above example code is stupid to prove a point
