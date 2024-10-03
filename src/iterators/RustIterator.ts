@@ -35,11 +35,17 @@ export class RustIterator<T> implements IterableIterator<T> {
   /**
    * To implement the Iterable. Returns Self (to be IterableIterator).
    * This allows for RustIterator to be used in for-of loops, and be spread easily.
-   * @returns {IterableIterator<T>}
+   * @returns {RustIterator<T>}
    */
-  [Symbol.iterator](): IterableIterator<T> {
+  [Symbol.iterator](): RustIterator<T> {
     return this
   }
+
+  /**
+   * To implement the Extended Iterable. Returns Self (to be IterableIterator).
+   * This allows for RustIterator to be used in for-of loops, and be spread easily.
+   * @returns {RustIterator<T>}
+   */
   iter() {
     return this
   }
@@ -116,7 +122,7 @@ export class RustIterator<T> implements IterableIterator<T> {
   ): T extends [infer K, infer V] ? Map<K, V> : never
   into(this: RustIterator<unknown>, container: typeof Set): Set<T>
   into(container: typeof Set | typeof Map) {
-    /** @ts-expect-error */
+    /** @ts-expect-error - Doesn't like differing Map and Set signatures */
     return new container(this)
   }
 
