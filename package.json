@@ -14,6 +14,10 @@
     "./upgrade": {
       "import": "./dist/upgrade/index.js",
       "types": "./dist/upgrade/index.d.ts"
+    },
+    "./prelude": {
+      "import": "./dist/prelude.js",
+      "types": "./dist/prelude.d.ts"
     }
   },
   "files": ["dist", "src"],

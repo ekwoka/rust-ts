@@ -117,9 +117,13 @@ export class RustIterator<T> implements IterableIterator<T> {
   }
 
   into(
-    this: RustIterator<[unknown, unknown]>,
+    this: RustIterator<[unknown, unknown] | readonly [unknown, unknown]>,
     container: typeof Map,
-  ): T extends [infer K, infer V] ? Map<K, V> : never
+  ): T extends [infer K, infer V]
+    ? Map<K, V>
+    : T extends readonly [infer K, infer V]
+      ? Map<K, V>
+      : never
   into(this: RustIterator<unknown>, container: typeof Set): Set<T>
   into(container: typeof Set | typeof Map) {
     /** @ts-expect-error - Doesn't like differing Map and Set signatures */
