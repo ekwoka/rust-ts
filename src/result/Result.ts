@@ -1,9 +1,6 @@
 import { None as NoneType, Option, Some } from '../option/Option.js'
 import { None } from '../option/index.js'
 
-const ok = Symbol()
-const err = Symbol()
-
 export interface Result<T, E> {
   isOk(): this is Ok<T>
   isErr(): this is Err<E>
@@ -15,10 +12,12 @@ export interface Result<T, E> {
   expect(message: string): T
 
   andThen<U>(this: Ok<T>, op: (value: T) => U): U
-  andThen<_U>(this: Err<E>): Err<E>
-  andThen<U>(this: Result<T, E>, op?: (value: T) => U): U | this
+  andThen<U>(this: Err<E>, op: (value: T) => U): Err<E>
+  andThen<U>(this: Result<T, E>, op: (value: T) => U): U | Err<E>
 
-  orElse<U>(op?: (error: E) => U): U | Ok<T>
+  orElse<U>(this: Ok<T>, op: (error: E) => U): Ok<T>
+  orElse<U>(this: Err<E>, op: (error: E) => U): U
+  orElse<U>(this: Result<T, E>, op: (error: E) => U): Ok<T> | U
 
   map<U>(op: (value: T) => U): Result<U, E>
   mapErr<U>(op: (error: E) => U): Result<T, U>
@@ -39,11 +38,7 @@ export interface Result<T, E> {
 }
 
 export class Ok<T> implements Result<T, never> {
-  is = ok
-  value: T
-  constructor(value?: T) {
-    this.value = value as T
-  }
+  constructor(private value: T) {}
   isOk(): this is Ok<T> {
     return true
   }
@@ -66,13 +61,10 @@ export class Ok<T> implements Result<T, never> {
     return this.value
   }
 
-  andThen<U>(this: Ok<T>, op: (value: T) => U): U
-  andThen<_U>(this: Err<never>): never
-  andThen<U>(this: Result<T, never>, op?: (value: T) => U): U | this
-  andThen<U>(op?: (value: T) => U): U | this {
-    return op!(this.value)
+  andThen<U>(op: (value: T) => U): U {
+    return op(this.value)
   }
-  orElse(): Ok<T> {
+  orElse<U>(_op: (error: never) => U): Ok<T> {
     return this
   }
 
@@ -114,11 +106,7 @@ export class Ok<T> implements Result<T, never> {
 }
 
 export class Err<E> implements Result<never, E> {
-  is = err
-  error: E
-  constructor(error?: E) {
-    this.error = error as E
-  }
+  constructor(private error: E) {}
   isOk(): this is Ok<never> {
     return false
   }
@@ -143,9 +131,10 @@ export class Err<E> implements Result<never, E> {
     )
   }
 
-  andThen(): Err<E> {
+  andThen<U>(_op: (value: never) => U): Err<E> {
     return this
   }
+
   orElse<U>(op: (error: E) => U): U {
     return op(this.error)
   }

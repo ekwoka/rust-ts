@@ -3,11 +3,11 @@ import { Err, Ok, Result, Try, TryAsync, isErr, isOk } from '@/result/Result'
 describe('Result', () => {
   it('should be able to create an Ok result', () => {
     const result = new Ok(42)
-    expect(result.value).toEqual(42)
+    expect(result.unwrap()).toEqual(42)
   })
   it('should be able to create an Err result', () => {
     const result = new Err(42)
-    expect(result.error).toEqual(42)
+    expect(result.unwrapErr()).toEqual(42)
   })
   it('can test if a result is Ok', () => {
     const okie = new Ok(42)
