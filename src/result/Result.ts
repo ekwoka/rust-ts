@@ -20,8 +20,11 @@ export interface Result<T, E> {
   orElse<U>(this: Result<T, E>, op: (error: E) => U): Ok<T> | U
 
   map<U>(op: (value: T) => U): Result<U, E>
+
   mapErr<U>(op: (error: E) => U): Result<T, U>
+
   mapOr<U>(op: (value: T) => U, defaultValue: U): U
+
   mapOrElse<U>(op: (value: T) => U, opErr: (error: E) => U): U
 
   inspect(inspector: (value: T) => void): Result<T, E>
@@ -29,11 +32,9 @@ export interface Result<T, E> {
 
   ok(): Option<T>
 
-  flatten<R extends Result<unknown, unknown>>(this: Ok<R>): R
-  flatten(this: Ok<T>): T extends Result<unknown, unknown> ? T : Ok<T>
-  flatten(this: Err<E>): Err<E>
-  flatten<U, F>(this: Result<Result<U, F>, E>): Result<U, E | F>
-  flatten(this: Result<T, E>): Result<T, E>
+  flatten<U, V>(this: Result<Result<U, V>, E>): Result<U, E | V>
+  flatten<U>(this: Result<Ok<U>, E>): Result<U, E>
+  flatten<U>(this: Result<Err<U>, E>): Err<U | E>
   flatten(): Result<unknown, unknown>
 }
 
@@ -68,7 +69,7 @@ export class Ok<T> implements Result<T, never> {
     return this
   }
 
-  map<U>(op: (value: T) => U): Result<U, never> {
+  map<U>(op: (value: T) => U): Ok<U> {
     return new Ok(op(this.value))
   }
   mapErr(): Result<T, never> {
@@ -94,14 +95,13 @@ export class Ok<T> implements Result<T, never> {
     return new Some(this.value)
   }
 
-  flatten<R extends Result<unknown, unknown>>(this: Ok<R>): R
-  flatten(this: Ok<T>): T extends Result<unknown, unknown> ? T : this
+  flatten(this: Ok<Result<unknown, unknown>>): T
+  flatten(this: Ok<Ok<unknown>>): T
+  flatten(this: Ok<Err<unknown>>): T
+  flatten(this: Ok<T>): Ok<T>
   flatten(this: Err<never>): never
-  flatten<U, F>(this: Result<Result<U, F>, never>): Result<U, never | F>
-  flatten(this: Result<T, never>): this
-  flatten(): T | this | Result<unknown, unknown> {
-    const val = this.value
-    return isResult(val) ? val : this
+  flatten(): T | Ok<T> {
+    return isResult(this.value) ? this.value : this
   }
 }
 
@@ -165,15 +165,10 @@ export class Err<E> implements Result<never, E> {
     return None
   }
 
-  flatten<U extends Result<unknown, unknown>>(this: Ok<U>): U
-  flatten(
-    this: Ok<never>,
-  ): never extends Result<unknown, unknown> ? never : Ok<never>
   flatten(this: Err<E>): Err<E>
-  flatten<U, F>(this: Result<Result<U, F>, E>): Result<U, E | F>
-  flatten(this: Result<never, E>): Result<never, E>
-  flatten(): unknown {
-    return this
+  flatten(this: Ok<never>): never
+  flatten(): Result<unknown, unknown> {
+    return this as never
   }
 }
 
