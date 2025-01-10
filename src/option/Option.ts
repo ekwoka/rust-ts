@@ -13,14 +13,21 @@ export interface Option<T = unknown, _N extends none = none> {
   unwrapOrElse(op: () => T): T
   expect(message: string): T
 
+  andThen<U>(this: Some<T>, op: (value: T) => U): U
+  andThen<U>(this: None, op: (value: T) => U): None
   andThen<U>(op: (value: T) => U): U | None
+
+  orElse<U>(this: Some<T>, op: () => U): Some<T>
+  orElse<U>(this: None, op: () => U): U
   orElse<U>(op: () => U): U | Some<T>
 
   map<U>(op: (value: T) => U): Option<U>
   mapOr<U>(op: (value: T) => U, defaultValue: U): U
   mapOrElse<U>(op: (value: T) => U, opErr: () => U): U
 
-  flatten(): FlattenOptionType<T>
+  flatten<U extends Option<unknown>>(this: Option<U>): U
+  flatten(this: Option<T>): Option<T>
+  flatten(): Option<unknown>
 
   inspect(inspector: (value: T) => void): Option<T>
 
@@ -68,9 +75,12 @@ export class Some<T> implements Option<T> {
   mapOrElse<U>(op: (value: T) => U, _opErr: () => U): U {
     return op(this.val)
   }
-  flatten(): FlattenOptionType<T> {
-    if (isOption(this.val)) return this.val as FlattenOptionType<T>
-    return this as unknown as FlattenOptionType<T>
+
+  flatten<U extends Option<unknown>>(this: Some<U>): U
+  flatten(this: Some<T>): Some<T>
+  flatten(): Option<unknown> {
+    if (isOption(this.val)) return this.val
+    return this
   }
 
   inspect(inspector: (value: T) => void): Some<T> {
@@ -121,6 +131,7 @@ export class None implements Option<never, none> {
   mapOrElse<U>(_op: (value: never) => U, opErr: () => U): U {
     return opErr()
   }
+
   flatten(): None {
     return this
   }
@@ -139,5 +150,3 @@ const isOption = <T extends Option<unknown>>(
 ): value is T => {
   return value instanceof Some || value instanceof None
 }
-
-type FlattenOptionType<T> = Option<T extends Option<infer Inner> ? Inner : T>
