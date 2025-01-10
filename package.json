@@ -41,18 +41,18 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@biomejs/biome": "1.9.3",
-    "@types/node": "22.7.4",
-    "@vitest/coverage-v8": "2.1.2",
-    "esbuild": "0.24.0",
-    "husky": "9.1.6",
-    "lint-staged": "15.2.10",
-    "npm-run-all2": "6.2.3",
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "22.10.5",
+    "@vitest/coverage-v8": "2.1.8",
+    "esbuild": "0.24.2",
+    "husky": "9.1.7",
+    "lint-staged": "15.3.0",
+    "npm-run-all2": "7.0.2",
     "pretty-bytes": "6.1.1",
-    "typescript": "5.6.2",
-    "vite": "5.4.8",
-    "vite-tsconfig-paths": "5.0.1",
-    "vitest": "2.1.2"
+    "typescript": "5.7.2",
+    "vite": "6.0.7",
+    "vite-tsconfig-paths": "5.1.4",
+    "vitest": "2.1.8"
   },
   "lint-staged": {
     "**/*.{ts,tsx,mjs,json,js}": "biome check --write"

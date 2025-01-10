@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -106,9 +106,18 @@
   },
   "overrides": [
     {
-      "include": ["*.test.ts", "*.bench.ts"],
+      "include": ["*.test.ts", "*.bench.ts", "*.test-d.ts"],
       "javascript": {
-        "globals": ["describe", "it", "expect", "beforeEach", "afterEach", "vi"]
+        "globals": [
+          "describe",
+          "it",
+          "expect",
+          "beforeEach",
+          "afterEach",
+          "vi",
+          "assertType",
+          "expectTypeOf"
+        ]
       },
       "linter": {
         "rules": {
