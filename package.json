@@ -8,15 +8,18 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "typescript": "./src/index.js",
       "types": "./dist/index.d.ts"
     },
     "./package.json": "./package.json",
     "./upgrade": {
       "import": "./dist/upgrade/index.js",
+      "typescript": "./src/upgrade/index.js",
       "types": "./dist/upgrade/index.d.ts"
     },
     "./prelude": {
       "import": "./dist/prelude.js",
+      "typescript": "./src/prelude.js",
       "types": "./dist/prelude.d.ts"
     }
   },

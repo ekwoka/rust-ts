@@ -1,4 +1,4 @@
-import { Err, Ok, Result } from '../result/Result.js'
+import { Err, Ok, type Result } from '../result/Result.js'
 
 const none = Symbol()
 type none = typeof none
@@ -52,7 +52,7 @@ export class Some<T> implements Option<T> {
   unwrapOr(_default: T): T {
     return this.val
   }
-  unwrapOrElse(_op: never): T {
+  unwrapOrElse(_op: () => T): T {
     return this.val
   }
   expect(_msg: string): T {
@@ -62,7 +62,7 @@ export class Some<T> implements Option<T> {
   andThen<U>(op: (value: T) => U): U {
     return op(this.val)
   }
-  orElse(): Some<T> {
+  orElse<U>(_op: () => U): Some<T> {
     return this
   }
 
@@ -115,7 +115,7 @@ export class None implements Option<never, none> {
     throw new Error(`Error unwrapping None. Expected ${msg}`)
   }
 
-  andThen(): None {
+  andThen<U>(_op: (value: never) => U): None {
     return this
   }
   orElse<U>(op: () => U): U {
