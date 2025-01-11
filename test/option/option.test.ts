@@ -47,10 +47,68 @@ describe('Option', () => {
       expect(new Some(42).orElse(() => new Some('69')).val).toBe(42)
     })
     it('None::andThen', () => {
-      expect(new None().andThen(() => new Some('69')).isNone()).toBe(true)
+      expect(new None().andThen(() => new Some('69'))).toBeInstanceOf(None)
     })
     it('None::orElse', () => {
       expect(new None().orElse(() => new Some('69')).val).toBe('69')
+    })
+  })
+  describe('transforming', () => {
+    it('Some::map', () => {
+      expect(new Some(42).map((n) => String(n)).val).toBe('42')
+    })
+    it('Some::mapOr', () => {
+      expect(new Some(42).mapOr((n) => String(n), '69')).toBe('42')
+    })
+    it('Some::mapOrElse', () => {
+      expect(
+        new Some(42).mapOrElse(
+          (n) => String(n),
+          () => '69',
+        ),
+      ).toBe('42')
+    })
+    it('Some::flatten', () => {
+      expect(new Some(new Some(42)).flatten().val).toBe(42)
+      expect(new Some(new None()).flatten()).toBeInstanceOf(None)
+      expect(new Some(42).flatten().val).toBe(42)
+    })
+    it('None::map', () => {
+      expect(new None().map((n) => String(n))).toBeInstanceOf(None)
+    })
+    it('None::mapOr', () => {
+      expect(new None().mapOr((n) => String(n), '69')).toBe('69')
+    })
+    it('None::mapOrElse', () => {
+      expect(
+        new None().mapOrElse(
+          (n) => String(n),
+          () => '69',
+        ),
+      ).toBe('69')
+    })
+    it('None::flatten', () => {
+      expect(new None().flatten()).toBeInstanceOf(None)
+    })
+  })
+  describe('inspection', () => {
+    it('Some::inspect', () => {
+      let val: null | number = null
+      expect(
+        new Some(42).inspect((v) => {
+          val = v
+        }),
+      ).toBeInstanceOf(Some)
+      expect(val).toBe(42)
+    })
+    it('None::inspect', () => {
+      let val: null | number = null
+      expect(
+        new None().inspect((v) => {
+          val = v
+        }),
+      ).toBeInstanceOf(None)
+      expect(val).toBeNull()
     })
   })
 })
