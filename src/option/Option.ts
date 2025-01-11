@@ -3,6 +3,10 @@ import { Err, Ok, type Result } from '../result/Result.js'
 const none = Symbol()
 type none = typeof none
 
+/**
+ * Represents an optional value.
+ * Base interface for `Some<T>` and `None`.
+ */
 export interface Option<T = unknown, _N extends none = none> {
   /**
    * The value contained in the Option
@@ -46,18 +50,18 @@ export interface Option<T = unknown, _N extends none = none> {
   unwrapOrElse(op: () => T): T
 
   /**
-   * Returns the value contained in the `Some` type.
-   * Throws with custom message if the `Option` is a `None`.
-   * @param {string} message - Should describe why the Option is expected to be Some
+   * Returns the value contained in the {@linkcode Some} type.
+   * Throws with custom message if the {@linkcode Option} is a {@linkcode None}.
+   * @param {string} message - Should describe why the {@linkcode Option} is expected to be {@linkcode Some}
    * @returns {T}
    * @throws {Error}
    */
   expect(message: string): T
 
   /**
-   * Returns None if the Option is a `None`, otherwise calls the function with the contained value and returns the resulting Option.
+   * Returns {@linkcode None} if the {@linkcode Option} is {@linkcode None}, otherwise calls the function with the contained value and returns the resulting {@linkcode Option}.
    * This can be viewed as a `flat map` operation.
-   * (equivalent to chaining `.map(fn).flatten()`)
+   * equivalent to chaining {@linkcode map|.map(fn)}{@linkcode flatten|.flatten()}
    * @param {(value: T) => Option} op
    * @returns {Option}
    */
@@ -66,7 +70,7 @@ export interface Option<T = unknown, _N extends none = none> {
   andThen<U extends Option>(op: (value: T) => U): U | None
 
   /**
-   * Returns the Option if it contains a value, otherwise calls the function and returns the result.
+   * Returns the {@linkcode Option} if it contains a value, otherwise calls the function and returns the result.
    * @param {() => Option} op
    * @returns {Option}
    */
@@ -75,15 +79,15 @@ export interface Option<T = unknown, _N extends none = none> {
   orElse<U extends Option>(op: () => U): U | Some<T>
 
   /**
-   * Maps an `Option<T>` -> `Option<U>` by applying a function to the contained value. If the Option is a `None`, this method also returns a `None`.
+   * Maps an {@linkcode Option<T>} -> {@linkcode Option<U>} by applying a function to the contained value. If the {@linkcode Option} is a {@linkcode None}, this method also returns a {@linkcode None}.
    * @param {(value: T) => U} op - functor with which to map the value
    * @returns {Option<U>}
    */
   map<U>(op: (value: T) => U): Option<U>
 
   /**
-   * Maps an `Option<T>` -> `U` by applying a function to the contained value. If the Option is a `None`, this method returns the default value.
-   * This is equivalent to chaining `.map(op).unwrapOr(defaultValue)`
+   * Maps an {@linkcode Option<T>} -> `U` by applying a function to the contained value. If the Option is a {@linkcode None}, this method returns the default value.
+   * This is equivalent to chaining {@linkcode map|.map(op)}{@linkcode unwrapOr|.unwrapOr(defaultValue)}
    * @param {(value: T) => U} op
    * @param {U} defaultValue
    * @returns {U}
@@ -91,8 +95,8 @@ export interface Option<T = unknown, _N extends none = none> {
   mapOr<U>(op: (value: T) => U, defaultValue: U): U
 
   /**
-   * Maps an `Option<T>` -> `U` by applying a function to the contained value. If the Option is a `None`, this method calls and returns the result of the second function.
-   * This is equivalent to chaining `.map(op).unwrapOrElse(opErr)`
+   * Maps an {@linkcode Option<T>} -> `U` by applying a function to the contained value. If the Option is a {@linkcode None}, this method calls and returns the result of the second function.
+   * This is equivalent to chaining {@linkcode map|.map(op)}{@linkcode unwrapOrElse|.unwrapOrElse(opErr)}
    * @param {(value: T) => U} op
    * @param {() => U} opErr
    * @returns {U}
@@ -100,7 +104,7 @@ export interface Option<T = unknown, _N extends none = none> {
   mapOrElse<U>(op: (value: T) => U, opErr: () => U): U
 
   /**
-   * Converts from `Option<Option<U>>` to `Option<U>`
+   * Converts from {@linkcode Option<Option<U>>} -> {@linkcode Option<U>}
    * @returns {Option<T> | Option<U>}
    */
   flatten<U extends Option<unknown>>(this: Option<U>): U
@@ -108,7 +112,7 @@ export interface Option<T = unknown, _N extends none = none> {
   flatten(): Option<unknown>
 
   /**
-   * Inspects the `Option` value by calling the function with the contained value if it is a `Some`.
+   * Inspects the {@linkcode Option} value by calling the function with the contained value if it is a {@linkcode Some}.
    * @param {(value: T) => void} inspector
    * @returns {Option<T>}
    */
@@ -124,8 +128,22 @@ export interface Option<T = unknown, _N extends none = none> {
   okOr<E>(error: E): Result<T, E>
 }
 
+/**
+ * Represents a value that is present.
+ * @extends {Option<T>}
+ */
 export class Some<T> implements Option<T> {
+  /**
+   * The value contained in the `Some` type.
+   * @type {T}
+   * @private
+   */
   val: T
+
+  /**
+   * Creates a new `Some` type with the given value.
+   * @param {T} val
+   */
   constructor(val: T) {
     this.val = val
   }
