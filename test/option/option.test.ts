@@ -1,4 +1,5 @@
-import { None, type Option, Some } from '@/option/Option'
+import { None, Some } from '@/option/Option'
+import { Err, Ok } from '@/result/Result'
 
 describe('Option', () => {
   describe('identity', () => {
@@ -41,21 +42,30 @@ describe('Option', () => {
   })
   describe('control flow', () => {
     it('Some::andThen', () => {
-      expect(new Some(42).andThen((n) => new Some(String(n))).val).toBe('42')
+      expect(new Some(42).andThen((n) => new Some(String(n)))).toHaveProperty(
+        'val',
+        '42',
+      )
     })
     it('Some::orElse', () => {
-      expect(new Some(42).orElse(() => new Some('69')).val).toBe(42)
+      expect(new Some(42).orElse(() => new Some('69'))).toHaveProperty(
+        'val',
+        42,
+      )
     })
     it('None::andThen', () => {
       expect(new None().andThen(() => new Some('69'))).toBeInstanceOf(None)
     })
     it('None::orElse', () => {
-      expect(new None().orElse(() => new Some('69')).val).toBe('69')
+      expect(new None().orElse(() => new Some('69'))).toHaveProperty(
+        'val',
+        '69',
+      )
     })
   })
   describe('transforming', () => {
     it('Some::map', () => {
-      expect(new Some(42).map((n) => String(n)).val).toBe('42')
+      expect(new Some(42).map((n) => String(n))).toHaveProperty('val', '42')
     })
     it('Some::mapOr', () => {
       expect(new Some(42).mapOr((n) => String(n), '69')).toBe('42')
@@ -69,9 +79,13 @@ describe('Option', () => {
       ).toBe('42')
     })
     it('Some::flatten', () => {
-      expect(new Some(new Some(42)).flatten().val).toBe(42)
+      expect(new Some(new Some(42)).flatten()).toHaveProperty('val', 42)
       expect(new Some(new None()).flatten()).toBeInstanceOf(None)
-      expect(new Some(42).flatten().val).toBe(42)
+      expect(new Some(42).flatten()).toHaveProperty('val', 42)
+    })
+    it('Some::okOr', () => {
+      expect(new Some(42).okOr(new Error())).toBeInstanceOf(Ok)
+      expect(new Some(42).okOr(new Error())).toHaveProperty('value', 42)
     })
     it('None::map', () => {
       expect(new None().map((n) => String(n))).toBeInstanceOf(None)
@@ -89,6 +103,10 @@ describe('Option', () => {
     })
     it('None::flatten', () => {
       expect(new None().flatten()).toBeInstanceOf(None)
+    })
+    it('None::okOr', () => {
+      expect(new None().okOr(new Error())).toBeInstanceOf(Err)
+      expect(new None().okOr(new Error())).toHaveProperty('error', new Error())
     })
   })
   describe('inspection', () => {

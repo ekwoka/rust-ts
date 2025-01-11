@@ -4,33 +4,123 @@ const none = Symbol()
 type none = typeof none
 
 export interface Option<T = unknown, _N extends none = none> {
+  /**
+   * The value contained in the Option
+   * @type {T}
+   */
   val: T
+
+  /**
+   * Returns true if the option is a `Some` type.
+   * @returns {this is Some<T>}
+   */
   isSome(): this is Some<T>
+
+  /**
+   * Returns true if the option is a `None` type.
+   * @returns {this is None}
+   */
   isNone(): this is None
 
+  /**
+   * Returns the value contained in the `Some` type. Throws if the `Option` is a `None`.
+   * Since this can throw an error, it is recommended to use `unwrapOr` or `unwrapOrElse` instead.
+   * If you are sure that the `Option` is a `Some`, it is recommended to use `expect` instead.
+   * @returns {T}
+   * @throws {Error}
+   */
   unwrap(): T
+
+  /**
+   * Returns the value contained in the `Some` type or the default value if the `Option` is a `None`.
+   * @param {T} defaultValue
+   * @returns {T}
+   */
   unwrapOr(defaultValue: T): T
+
+  /**
+   * Returns the value contained in the `Some` type or the result of the function if the `Option` is a `None`.
+   * @param {() => T} op
+   * @returns {T}
+   */
   unwrapOrElse(op: () => T): T
+
+  /**
+   * Returns the value contained in the `Some` type.
+   * Throws with custom message if the `Option` is a `None`.
+   * @param {string} message - Should describe why the Option is expected to be Some
+   * @returns {T}
+   * @throws {Error}
+   */
   expect(message: string): T
 
-  andThen<U>(this: Some<T>, op: (value: T) => U): U
-  andThen<U>(this: None, op: (value: T) => U): None
-  andThen<U>(op: (value: T) => U): U | None
+  /**
+   * Returns None if the Option is a `None`, otherwise calls the function with the contained value and returns the resulting Option.
+   * This can be viewed as a `flat map` operation.
+   * (equivalent to chaining `.map(fn).flatten()`)
+   * @param {(value: T) => Option} op
+   * @returns {Option}
+   */
+  andThen<U extends Option>(this: Some<T>, op: (value: T) => U): U
+  andThen<U extends Option>(this: None, op: (value: T) => U): None
+  andThen<U extends Option>(op: (value: T) => U): U | None
 
-  orElse<U>(this: Some<T>, op: () => U): Some<T>
-  orElse<U>(this: None, op: () => U): U
-  orElse<U>(op: () => U): U | Some<T>
+  /**
+   * Returns the Option if it contains a value, otherwise calls the function and returns the result.
+   * @param {() => Option} op
+   * @returns {Option}
+   */
+  orElse<U extends Option>(this: Some<T>, op: () => U): Some<T>
+  orElse<U extends Option>(this: None, op: () => U): U
+  orElse<U extends Option>(op: () => U): U | Some<T>
 
+  /**
+   * Maps an `Option<T>` -> `Option<U>` by applying a function to the contained value. If the Option is a `None`, this method also returns a `None`.
+   * @param {(value: T) => U} op - functor with which to map the value
+   * @returns {Option<U>}
+   */
   map<U>(op: (value: T) => U): Option<U>
+
+  /**
+   * Maps an `Option<T>` -> `U` by applying a function to the contained value. If the Option is a `None`, this method returns the default value.
+   * This is equivalent to chaining `.map(op).unwrapOr(defaultValue)`
+   * @param {(value: T) => U} op
+   * @param {U} defaultValue
+   * @returns {U}
+   */
   mapOr<U>(op: (value: T) => U, defaultValue: U): U
+
+  /**
+   * Maps an `Option<T>` -> `U` by applying a function to the contained value. If the Option is a `None`, this method calls and returns the result of the second function.
+   * This is equivalent to chaining `.map(op).unwrapOrElse(opErr)`
+   * @param {(value: T) => U} op
+   * @param {() => U} opErr
+   * @returns {U}
+   */
   mapOrElse<U>(op: (value: T) => U, opErr: () => U): U
 
+  /**
+   * Converts from `Option<Option<U>>` to `Option<U>`
+   * @returns {Option<T> | Option<U>}
+   */
   flatten<U extends Option<unknown>>(this: Option<U>): U
   flatten(this: Option<T>): Option<T>
   flatten(): Option<unknown>
 
+  /**
+   * Inspects the `Option` value by calling the function with the contained value if it is a `Some`.
+   * @param {(value: T) => void} inspector
+   * @returns {Option<T>}
+   */
   inspect(inspector: (value: T) => void): Option<T>
 
+  /**
+   * Maps an `Option<T> -> Result<T, E>`.
+   * `Some<T> -> Ok<T>`
+   * `None -> Err<E>`
+   * @param {E} error
+   * @returns {Result<T, E>}
+   */
   okOr<E>(error: E): Result<T, E>
 }
 
@@ -89,7 +179,7 @@ export class Some<T> implements Option<T> {
     return this
   }
 
-  okOr<E>(_error: E): Result<T, E> {
+  okOr<E>(_error: E): Ok<T> {
     return new Ok(this.val)
   }
 }
@@ -136,11 +226,11 @@ export class None implements Option<never, none> {
     return this
   }
 
-  inspect(): None {
+  inspect(_op: (_v: never) => void): None {
     return this
   }
 
-  okOr<E>(error: E): Result<never, E> {
+  okOr<E>(error: E): Err<E> {
     return new Err(error)
   }
 }
