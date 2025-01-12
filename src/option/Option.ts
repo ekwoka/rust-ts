@@ -32,23 +32,23 @@ export interface Option<T = unknown, _N extends none = none> {
 
   /**
    * Returns true if the option is a `Some` type.
-   * @returns {this is Some<T>}
    * @group Inspecting Methods
    */
   isSome(): this is Some<T>
 
   /**
    * Returns true if the option is a `None` type.
-   * @returns {this is None}
    * @group Inspecting Methods
    */
   isNone(): this is None
 
   /**
    * Returns the value contained in the {@linkcode Some} type. Throws if the {@linkcode Option} is {@linkcode None}.
+   *
    * @remarks
    * Since this can throw an error, it is recommended to use {@linkcode unwrapOr} or {@linkcode unwrapOrElse} instead.
-   * If you are sure that the {@linkcode Option} is a {@linkcode Some}, it is recommended to use {@linkcode expect} instead.
+   * If you are sure that the {@linkcode Option} is {@linkcode Some}, it is recommended to use {@linkcode expect} instead.
+   *
    * @throws {Error} Error when {@linkcode Option} is {@linkcode None}
    *
    * @group Value Unwrapping Methods
@@ -118,7 +118,7 @@ export interface Option<T = unknown, _N extends none = none> {
   /**
    * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode Option|Option\<U\>}
    * by applying a function to the contained value.
-   * If the {@linkcode Option} is a {@linkcode None}, this method also returns a {@linkcode None}.
+   * If the {@linkcode Option} is {@linkcode None}, this method also returns a {@linkcode None}.
    *
    * @param op - functor with which to map the value
    *
@@ -129,7 +129,7 @@ export interface Option<T = unknown, _N extends none = none> {
   /**
    * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode U}
    * by applying a function to the contained value.
-   * If the Option is a {@linkcode None}, this method returns the default value.
+   * If the {@linkcode Option} is {@linkcode None}, this method returns the default value.
    *
    * @remarks
    * This is equivalent to chaining
@@ -144,7 +144,7 @@ export interface Option<T = unknown, _N extends none = none> {
   /**
    * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode U}
    * by applying a function to the contained value.
-   * If the Option is a {@linkcode None}, this method calls and returns the result of the second function.
+   * If the {@linkcode Option} is {@linkcode None}, this method calls and returns the result of the second function.
    *
    * @remarks
    * This is equivalent to chaining
@@ -152,11 +152,11 @@ export interface Option<T = unknown, _N extends none = none> {
    *
    * @param op - functor with which to map the value
    *
-   * @param opErr - function that generates a default value
+   * @param opNone - function that generates a default value
    *
    * @group Transforming Methods
    */
-  mapOrElse<U>(op: (value: T) => U, opErr: () => U): U
+  mapOrElse<U>(op: (value: T) => U, opNone: () => U): U
 
   /** @hidden */
   flatten<U extends Option<unknown>>(this: Option<U>): U
