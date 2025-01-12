@@ -1,5 +1,4 @@
-import { None as NoneType, Option, Some } from '../option/Option.js'
-import { None } from '../option/index.js'
+import { None, Option, Some } from '../option/Option.js'
 
 export interface Result<T, E> {
   isOk(): this is Ok<T>
@@ -161,8 +160,8 @@ export class Err<E> implements Result<never, E> {
     return this
   }
 
-  ok(): NoneType {
-    return None
+  ok(): None {
+    return new None()
   }
 
   flatten(this: Err<E>): Err<E>

@@ -1,3 +1,6 @@
+/**
+ * @module Option
+ */
 import { None as none } from './Option.js'
 
 export type { Option } from './Option.js'
