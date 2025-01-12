@@ -1,4 +1,4 @@
-import { None, Some } from '@/option/Option'
+import { None, type Option, Some } from '@/option/Option'
 import { Err, Ok } from '@/result/Result'
 
 describe('Option', () => {

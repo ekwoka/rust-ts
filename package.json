@@ -28,6 +28,7 @@
   "scripts": {
     "build": "tsc",
     "coverage": "vitest run --coverage",
+    "docs": "typedoc --out docs --entryPointStrategy expand ./src",
     "doctor": "run-s lint test:run build size",
     "lint": "run-s lint:*",
     "lint:biome": "biome check --write",
@@ -52,6 +53,7 @@
     "lint-staged": "15.3.0",
     "npm-run-all2": "7.0.2",
     "pretty-bytes": "6.1.1",
+    "typedoc": "0.27.6",
     "typescript": "5.7.3",
     "vite": "6.0.7",
     "vite-tsconfig-paths": "5.1.4",
