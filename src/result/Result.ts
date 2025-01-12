@@ -449,12 +449,25 @@ export class Err<E> implements Result<never, E> {
   }
 }
 
+/**
+ * Identifies if the {@linkcode Result} is {@linkcode Ok}
+ */
 export const isOk = <T, E>(result: Result<T, E>): result is Ok<T> =>
   result.isOk()
 
+/**
+ * Identifies if the {@linkcode Result} is {@linkcode Err}
+ */
 export const isErr = <T, E>(result: Result<T, E>): result is Err<E> =>
   result.isErr()
 
+/**
+ * Utility that calls a fallible function, returning a {@linkcode Result}.
+ * If the function runs to completion, the result is {@linkcode Ok},
+ * otherwise the result is {@linkcode Err} with the thrown error.
+ *
+ * @see {@linkcode TryAsync} for asynchronous operations
+ */
 export const Try = <T, E = Error>(op: () => T): Result<T, E> => {
   try {
     return new Ok(op())
@@ -463,6 +476,13 @@ export const Try = <T, E = Error>(op: () => T): Result<T, E> => {
   }
 }
 
+/**
+ * Utility that calls a fallible asynchronous function, returning a Promise of a {@linkcode Result}.
+ * If the Promise resolves safely, the result is {@linkcode Ok},
+ * otherwise the result is {@linkcode Err} with the thrown error.
+ *
+ * @see {@linkcode Try} for synchronous operations
+ */
 export const TryAsync = async <T, E = Error>(
   op: () => Promise<T>,
 ): Promise<Result<T, E>> => {
@@ -473,5 +493,8 @@ export const TryAsync = async <T, E = Error>(
   }
 }
 
+/**
+ * Identifies if the passed in value is {@linkcode Result}
+ */
 export const isResult = (value: unknown): value is Result<unknown, unknown> =>
   value instanceof Ok || value instanceof Err
