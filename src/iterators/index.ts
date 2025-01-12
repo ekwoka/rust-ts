@@ -1,3 +1,6 @@
+/**
+ * @module RustIterator
+ */
 import { RustIterator } from './RustIterator.js'
 
 export { arrayChunks } from './arrayChunks.js'

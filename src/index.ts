@@ -1,3 +1,4 @@
+/** @module @ignore */
 export {
   arrayChunks,
   chain,
