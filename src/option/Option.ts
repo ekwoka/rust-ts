@@ -91,7 +91,9 @@ export interface Option<T = unknown, _N extends none = none> {
   /** @hidden */
   andThen<U extends Option>(this: None, op: (value: T) => U): None
   /**
-   * Returns {@linkcode None} if the {@linkcode Option} is {@linkcode None}, otherwise calls the function with the contained value and returns the resulting {@linkcode Option}.
+   * Returns {@linkcode None} if the {@linkcode Option} is {@linkcode None},
+   * otherwise calls the function with the contained value
+   * and returns the resulting {@linkcode Option}.
    *
    * @remarks
    * This can be viewed as a `flat map` operation.
@@ -106,14 +108,17 @@ export interface Option<T = unknown, _N extends none = none> {
   /** @hidden */
   orElse<U extends Option>(this: None, op: () => U): U
   /**
-   * Returns this {@linkcode Option} if it is {@linkcode Some}, otherwise calls the function and returns the result
+   * Returns this {@linkcode Option} if it is {@linkcode Some},
+   * otherwise calls the function and returns the result
    *
    * @group Control Flow Methods
    */
   orElse<U extends Option>(op: () => U): Option<T | U>
 
   /**
-   * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode Option|Option\<U\>} by applying a function to the contained value. If the {@linkcode Option} is a {@linkcode None}, this method also returns a {@linkcode None}.
+   * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode Option|Option\<U\>}
+   * by applying a function to the contained value.
+   * If the {@linkcode Option} is a {@linkcode None}, this method also returns a {@linkcode None}.
    *
    * @param op - functor with which to map the value
    *
@@ -122,10 +127,13 @@ export interface Option<T = unknown, _N extends none = none> {
   map<U>(op: (value: T) => U): Option<U>
 
   /**
-   * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode U} by applying a function to the contained value. If the Option is a {@linkcode None}, this method returns the default value.
+   * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode U}
+   * by applying a function to the contained value.
+   * If the Option is a {@linkcode None}, this method returns the default value.
    *
    * @remarks
-   * This is equivalent to chaining {@linkcode map|.map(op)}{@linkcode unwrapOr|.unwrapOr(defaultValue)}
+   * This is equivalent to chaining
+   * {@linkcode map|.map(op)}{@linkcode unwrapOr|.unwrapOr(defaultValue)}
    *
    * @param op - functor for mapping the contained value
    *
@@ -134,10 +142,13 @@ export interface Option<T = unknown, _N extends none = none> {
   mapOr<U>(op: (value: T) => U, defaultValue: U): U
 
   /**
-   * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode U}  by applying a function to the contained value. If the Option is a {@linkcode None}, this method calls and returns the result of the second function.
+   * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode U}
+   * by applying a function to the contained value.
+   * If the Option is a {@linkcode None}, this method calls and returns the result of the second function.
    *
    * @remarks
-   * This is equivalent to chaining {@linkcode map|.map(op)}{@linkcode unwrapOrElse|.unwrapOrElse(opErr)}
+   * This is equivalent to chaining
+   * {@linkcode map|.map(op)}{@linkcode unwrapOrElse|.unwrapOrElse(opErr)}
    *
    * @param op - functor with which to map the value
    *
@@ -152,24 +163,29 @@ export interface Option<T = unknown, _N extends none = none> {
   /** @hidden */
   flatten(this: Option<T>): Option<T>
   /**
-   * Converts from {@linkcode Option|Option<Option\<unknown\>>} -> {@linkcode Option|Option\<unknown\>}. If {@linkcode T} is not {@linkcode Option}, this {@linkcode Option} is returned
+   * Converts from {@linkcode Option|Option<Option\<unknown\>>} -> {@linkcode Option|Option\<unknown\>}.
+   * If {@linkcode T} is not {@linkcode Option}, this {@linkcode Option} is returned.
    *
    * @group Transforming Methods
    */
   flatten(): Option
 
   /**
-   * Inspects the {@linkcode Option} value by calling the function with the contained value if it is a {@linkcode Some}.
+   * Inspects the {@linkcode Option} value
+   * by calling the function with the contained value if it is a {@linkcode Some}.
+   *
    * @group Inspecting Methods
    */
   inspect(inspector: (value: T) => void): Option<T>
 
   /**
-   * Maps an `Option<T> -> Result<T, E>`.
-   * `Some<T> -> Ok<T>`
-   * `None -> Err<E>`
-   * @param {E} error
-   * @returns {Result<T, E>}
+   * Maps an {@linkcode Option|Option\<T\>} -> {@linkcode Result|Result\<T, E\>},
+   * {@linkcode Some|Some\<T\>} -> {@linkcode Ok|Ok\<T\>},
+   * {@linkcode None} -> {@linkcode Err|Err\<E\>}
+   *
+   * @param {E} error - values to contain in {@linkcode Err}
+   *
+   * @group Transforming Methods
    */
   okOr<E>(error: E): Result<T, E>
 }
