@@ -1,3 +1,8 @@
+/**
+ * @module
+ * @mergeModuleWith RustIterator
+ */
+
 import { takeWhilePeek } from './Peekable/takeWhilePeek.js'
 import { arrayChunks } from './arrayChunks.js'
 import { chain } from './chain.js'
