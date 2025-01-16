@@ -7,27 +7,157 @@ import { RustIterator } from './iterators/RustIterator.js'
 
 /**
  * A vector of N dimensions.
+ *
+ *  *
+ * @groupdescription Vector
+ *
+ * @groupdescription Math
+ * @groupdescription Static Math
+ *
+ * @groupdescription Equality
+ *
+ * @groupdescription Iterable
+ *
+ * @groupdescription From
+ * @groupdescription Static From
+ *
+ * @groupdescription To
+ * @groupdescription Static To
+ *
+ * @groupdescription Prebuilt Vectors
  */
 export interface Vector<N extends number> {
+  /**
+   * Adds another Vec to the current Vec returning a new Vec
+   *
+   * @remarks
+   * This can be used to "move" a position vector
+   * along a velocity vector.
+   *
+   * @group Math
+   */
   add(rhs: Vector<N>): Vector<N>
+
+  /**
+   * Subtracts another Vec from the current Vec returning a new Vec
+   *
+   * @remarks
+   * This can be used to get a velocity vector representing the difference between two position vectors.
+   *
+   * @group Math
+   */
   sub(rhs: Vector<N>): Vector<N>
+
+  /**
+   * Multiplies another Vec with the current Vec returning a new Vec
+   *
+   *
+   * @group Math
+   */
   mult(rhs: Vector<N>): Vector<N>
+
+  /**
+   * Divides another Vec with the current Vec returning a new Vec
+   *
+   * @group Math
+   */
   div(rhs: Vector<N>): Vector<N>
 
+  /**
+   * Returns the partwise minimum of the current Vec and another Vec
+   *
+   * @group Math
+   */
   min(rhs: Vector<N>): Vector<N>
+
+  /**
+   * Returns the partwise maximum of the current Vec and another Vec
+   *
+   * @group Math
+   */
   max(rhs: Vector<N>): Vector<N>
+
+  /**
+   * Returns a new Vec representing the current Vec clamped between a minimum and maximum Vec
+   *
+   * @group Math
+   */
   clamp(min: Vector<N>, max: Vector<N>): Vector<N>
 
+  /**
+   * Returns the partwise absolute value of the current Vec
+   *
+   * @group Math
+   */
   abs(): Vector<N>
+
+  /**
+   * Returns the partwise ceiling of the current Vec
+   *
+   * @group Math
+   */
   ceil(): Vector<N>
+
+  /**
+   * Returns the partwise floor of the current Vec
+   *
+   * @group Math
+   */
   floor(): Vector<N>
+
+  /**
+   * Returns the partwise rounded value of the current Vec
+   *
+   * @group Math
+   */
   round(): Vector<N>
 
+  /**
+   * Returns a new Vec that is the current Vec with all parts multiplied by a scalar
+   *
+   * @group Math
+   */
   scale(scalar: number): Vector<N>
+
+  /**
+   * Returns the dot product of the current Vec and another Vec
+   *
+   * @remarks
+   * The dot product is the sum of the products of the corresponding entries of the two Vecs. ie. `a.x * b.x + a.y * b.y + ...`
+   *
+   * @group Math
+   */
   dot(rhs: Vector<N>): number
+
+  /**
+   * Returns the length of the current Vec
+   *
+   * @remarks
+   * The length is the magnitude of the Vec treated as a vector from the origin to the point represented by the Vec.
+   *
+   * @group Math
+   */
   length(): number
+
+  /**
+   * Returns a new Vec that is the current Vec normalized to a length of 1
+   *
+   * @remarks
+   * The normalized Vec has the same direction as the original Vec but a length of 1.
+   * This is useful for representing directions without regard to magnitude.
+   *
+   * @group Math
+   */
   normalize(): Vector<N>
 
+  /**
+   * Returns the projection of the current Vec onto another Vec
+   *
+   * @remarks
+   * The projection is the part of the current Vec that lies in the direction of the other Vec.
+   *
+   * @group Math
+   */
   projectOnto(rhs: Vector<N>): Vector<N>
   rejectFrom(rhs: Vector<N>): Vector<N>
 
@@ -48,23 +178,6 @@ export interface Vector<N extends number> {
 
 /**
  * A 2-dimensional vector.
- *
- * @groupdescription Vector
- *
- * @groupdescription Math
- * @groupdescription Static Math
- *
- * @groupdescription Equality
- *
- * @groupdescription Iterable
- *
- * @groupdescription From
- * @groupdescription Static From
- *
- * @groupdescription To
- * @groupdescription Static To
- *
- * @groupdescription Prebuilt Vectors
  */
 export class Vec2 implements Vector<2>, Iterable<number> {
   /**
@@ -75,52 +188,30 @@ export class Vec2 implements Vector<2>, Iterable<number> {
     public y: number,
   ) {}
 
-  /**
-   * Adds a Vec2 to the current Vec2.
-   *
-   * @remarks
-   * This can be used to "move" a position vector
-   * along a velocity vector.
-   *
-   * @group Math
-   */
   add(rhs: Vec2): Vec2 {
     return new Vec2(this.x + rhs.x, this.y + rhs.y)
   }
 
-  /**
-   * Subtracts a Vec2 from the current Vec2.
-   *
-   * @remarks
-   * This can be used to get a velocity vector representing the difference between two position vectors.
-   *
-   * @group Math
-   */
   sub(rhs: Vec2): Vec2 {
     return new Vec2(this.x - rhs.x, this.y - rhs.y)
   }
 
-  /** @group Math */
   mult(rhs: Vec2): Vec2 {
     return new Vec2(this.x * rhs.x, this.y * rhs.y)
   }
 
-  /** @group Math */
   div(rhs: Vec2): Vec2 {
     return new Vec2(this.x / rhs.x, this.y / rhs.y)
   }
 
-  /** @group Math */
   min(rhs: Vec2): Vec2 {
     return new Vec2(Math.min(this.x, rhs.x), Math.min(this.y, rhs.y))
   }
 
-  /** @group Math */
   max(rhs: Vec2): Vec2 {
     return new Vec2(Math.max(this.x, rhs.x), Math.max(this.y, rhs.y))
   }
 
-  /** @group Math */
   clamp(min: Vec2, max: Vec2): Vec2 {
     return new Vec2(
       Math.min(max.x, Math.max(min.x, this.x)),
@@ -128,48 +219,39 @@ export class Vec2 implements Vector<2>, Iterable<number> {
     )
   }
 
-  /** @group Math */
   abs(): Vec2 {
     return new Vec2(Math.abs(this.x), Math.abs(this.y))
   }
 
-  /** @group Math */
   ceil(): Vec2 {
     return new Vec2(Math.ceil(this.x), Math.ceil(this.y))
   }
 
-  /** @group Math */
   floor(): Vec2 {
     return new Vec2(Math.floor(this.x), Math.floor(this.y))
   }
 
-  /** @group Math */
   round(): Vec2 {
     return new Vec2(Math.round(this.x), Math.round(this.y))
   }
 
-  /** @group Math */
   scale(scalar: number): Vec2 {
     return new Vec2(this.x * scalar, this.y * scalar)
   }
 
-  /** @group Math */
   dot(v: Vec2): number {
     return this.x * v.x + this.y * v.y
   }
 
-  /** @group Math */
   length(): number {
     return Math.sqrt(this.x ** 2 + this.y ** 2)
   }
 
-  /** @group Math */
   normalize(): Vec2 {
     const length = this.length()
     return new Vec2(this.x / length, this.y / length)
   }
 
-  /** @group Math */
   projectOnto(rhs: Vec2): Vec2 {
     const normalized = rhs.normalize()
     return normalized.scale(this.dot(normalized))
