@@ -27,6 +27,7 @@
     "strict": true,
     "target": "esNext",
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "customConditions": ["typescript"]
   }
 }
