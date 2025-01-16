@@ -159,10 +159,35 @@ export interface Vector<N extends number> {
    * @group Math
    */
   projectOnto(rhs: Vector<N>): Vector<N>
+
+  /**
+   * Returns the rejection of the current Vec from another Vec
+   *
+   * @remarks
+   * The rejection is the part of the current Vec that lies perpendicular to the other Vec.
+   *
+   * @group Math
+   */
   rejectFrom(rhs: Vector<N>): Vector<N>
 
+  /**
+   * Returns the distance between the current Vec and another Vec
+   *
+   * @remarks
+   * The distance is the magnitude of the difference between the two Vecs.
+   * This is equivalent to {@linkcode sub|a.sub(b)} {@linkcode Vector#length|.length()}.
+   *
+   * @group Math
+   */
   distance(rhs: Vector<N>): number
+
+  /**
+   * Returns the midpoint between the current Vec and another Vec
+   *
+   * @group Math
+   */
   midPoint(rhs: Vector<N>): Vector<N>
+
   moveTowards(rhs: Vector<N>, distance: number): Vector<N>
   lerp(rhs: Vector<N>, t: number): Vector<N>
 
@@ -257,17 +282,14 @@ export class Vec2 implements Vector<2>, Iterable<number> {
     return normalized.scale(this.dot(normalized))
   }
 
-  /** @group Math */
   rejectFrom(rhs: Vec2): Vec2 {
     return this.sub(this.projectOnto(rhs))
   }
 
-  /** @group Math */
   distance(rhs: Vec2): number {
     return this.sub(rhs).length()
   }
 
-  /** @group Math */
   midPoint(rhs: Vec2): Vec2 {
     return this.add(rhs).scale(0.5)
   }
