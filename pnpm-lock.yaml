@@ -15,6 +15,15 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
+      '@biomejs/cli-darwin-arm64':
+        specifier: 1.9.4
+        version: 1.9.4
+      '@esbuild/darwin-arm64':
+        specifier: 0.24.2
+        version: 0.24.2
+      '@rollup/rollup-darwin-arm64':
+        specifier: 4.30.1
+        version: 4.30.1
       '@types/node':
         specifier: 22.10.7
         version: 22.10.7
@@ -86,7 +95,6 @@ packages:
   '@biomejs/cli-darwin-arm64@1.9.4':
     resolution: {integrity: sha512-bFBsPWrNvkdKrNCYeAp+xo2HecOGPAy9WyNyB/jKnnedgzl4W4Hb9ZMzYNbf8dMCGmUdSavlYHiR01QaYR58cw==}
     engines: {node: '>=14.21.3'}
-    cpu: [arm64]
     os: [darwin]
 
   '@biomejs/cli-darwin-x64@1.9.4':
@@ -158,7 +166,6 @@ packages:
   '@esbuild/darwin-arm64@0.24.2':
     resolution: {integrity: sha512-kj3AnYWc+CekmZnS5IPu9D+HWtUI49hbnyqk0FLEJDbzCIQt7hg7ucF1SQAilhtYpIujfaHr6O0UHlzzSPdOeA==}
     engines: {node: '>=18'}
-    cpu: [arm64]
     os: [darwin]
 
   '@esbuild/darwin-x64@0.24.2':
@@ -326,6 +333,11 @@ packages:
 
   '@rollup/rollup-darwin-arm64@4.24.0':
     resolution: {integrity: sha512-bIv+X9xeSs1XCk6DVvkO+S/z8/2AMt/2lMqdQbMrmVpgFvXlmde9mLcbQpztXm1tajC3raFDqegsH18HQPMYtA==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@rollup/rollup-darwin-arm64@4.30.1':
+    resolution: {integrity: sha512-r7FQIXD7gB0WJ5mokTUgUWPl0eYIH0wnxqeSAhuIwvnnpjdVB8cRRClyKLQr7lgzjctkbp5KmswWszlwYln03Q==}
     cpu: [arm64]
     os: [darwin]
 
@@ -1172,8 +1184,7 @@ snapshots:
       '@biomejs/cli-win32-arm64': 1.9.4
       '@biomejs/cli-win32-x64': 1.9.4
 
-  '@biomejs/cli-darwin-arm64@1.9.4':
-    optional: true
+  '@biomejs/cli-darwin-arm64@1.9.4': {}
 
   '@biomejs/cli-darwin-x64@1.9.4':
     optional: true
@@ -1208,8 +1219,7 @@ snapshots:
   '@esbuild/android-x64@0.24.2':
     optional: true
 
-  '@esbuild/darwin-arm64@0.24.2':
-    optional: true
+  '@esbuild/darwin-arm64@0.24.2': {}
 
   '@esbuild/darwin-x64@0.24.2':
     optional: true
@@ -1316,6 +1326,8 @@ snapshots:
 
   '@rollup/rollup-darwin-arm64@4.24.0':
     optional: true
+
+  '@rollup/rollup-darwin-arm64@4.30.1': {}
 
   '@rollup/rollup-darwin-x64@4.24.0':
     optional: true

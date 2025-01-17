@@ -1,0 +1,29 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
+{
+  "name": "rust-ts",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "features": {
+    "ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {
+      "command1": "apt-get update; apt-get upgrade -y; apt-get install pkg-config -y",
+      "command2": "curl -fsSL https://get.pnpm.io/install.sh | env ENV=\"$HOME/.bashrc\" SHELL=\"$(which bash)\" PNPM_VERSION=10.0.0 sh -"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "biomejs.biome",
+        "esbenp.prettier-vscode",
+        "Shopify.theme-check-vscode",
+        "YoavBls.pretty-ts-errors",
+        "ritwickdey.LiveServer"
+      ]
+    }
+  },
+
+  "postStartCommand": ". /root/.bashrc; pnpm i",
+
+  "remoteUser": "root"
+}
