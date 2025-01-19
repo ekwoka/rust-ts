@@ -1,4 +1,8 @@
 /**
+ * This is a simple and clean implementation of the `Iter` trait from Rust,
+ * named as `RustIterator` to avoid conflicts with the current abstract `Iterator` interface in TypeScript,
+ * or the upcoming `Iterator` interface in JavaScript.
+ *
  * @module RustIterator
  */
 import { RustIterator } from './RustIterator.js'
