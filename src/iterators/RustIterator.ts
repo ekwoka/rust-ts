@@ -129,12 +129,24 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return { value: chunk, done: false }
   }
 
+  /**
+   * Counts the items yielded by the `Iterator`.
+   *
+   * @group Consuming
+   */
   count(): number {
     let count = 0
     while (!this.next().done) count++
     return count
   }
 
+  /**
+   * Returns the final value yielded by the `Iterator`.
+   *
+   * If the `Iterator` is already `done` or never yields a value before becoming `done`, returns `undefined`.
+   *
+   * @group Consuming
+   */
   last(): Item | undefined {
     let last
     // eslint-disable-next-line no-constant-condition
@@ -145,10 +157,27 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     }
   }
 
-  advanceBy(n: number): void {
+  /**
+   * Advances the `Iterator` {@linkcode n}` steps consuming those values.
+   *
+   * @param n - the amount of values to skip
+   *
+   * @group Consuming
+   */
+  advanceBy(n: number): this {
     while (n--) this.next()
+    return this
   }
 
+  /**
+   * Returns the `nth` value yielded by the `Iterator`.
+   *
+   * If the `Iterator` becomes `done` before `n` values, returns `undefined`
+   *
+   * @param n - the 0-index of the value to return
+   *
+   * @group Consuming
+   */
   nth(n: number): Item | undefined {
     this.advanceBy(n)
     return this.next().value
@@ -202,8 +231,17 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return new RustIterator(arrayChunks<Item, N>(this, size))
   }
 
-  map<S>(f: (val: Item) => S): RustIterator<S> {
-    return new RustIterator(map(this, f))
+  /**
+   * Will yield the result of passing each value through {@linkcode functor}.
+   *
+   * @see `Array.map`
+   *
+   * @param functor - Function to pass all yielded values through
+   *
+   * @group Iterating
+   */
+  map<S>(functor: (val: Item) => S): RustIterator<S> {
+    return new RustIterator(map(this, functor))
   }
 
   filter(f: (val: Item) => boolean): RustIterator<Item> {
@@ -432,16 +470,32 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return new RustIterator(sort(this, compare))
   }
 
-  position(checker: (item: Item) => boolean): number | null {
+  /**
+   * Returns the 0-index of the first yielded value that returns `true` when passed to the {@linkcode predicate}.
+   *
+   * Returns `null` when no yielded values match
+   *
+   * @see `Array.findIndex`, except that it will not return `-1` on no match
+   *
+   * @param predicate - A function that will be called with each value of the `Iterator`, returning a boolean
+   *
+   * @group Consuming
+   */
+  position(predicate: (item: Item) => boolean): number | null {
     let i = 0
     for (const item of this) {
-      if (checker(item)) return i
+      if (predicate(item)) return i
       i++
     }
     return null
   }
-  findIndex(checker: (item: Item) => boolean): number | null {
-    return this.position(checker)
+  /**
+   * Alias for {@linkcode position}
+   *
+   * @group Consuming
+   */
+  findIndex(predicate: (item: Item) => boolean): number | null {
+    return this.position(predicate)
   }
   reverse() {
     return new RustIterator(reverse(this))
