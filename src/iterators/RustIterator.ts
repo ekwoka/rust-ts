@@ -227,6 +227,18 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return new container(this)
   }
 
+  /**
+   * Will yield tuples of size length of values from the Iterator.
+   *
+   * @param size - The number of values to yield in a tuple array.
+   *
+   * @remarks
+   *
+   * If the end of the Iterator is reached and the internal chunk is not yet size length, the chunk is yielded as is.
+   * The missing values will be undefined.
+   *
+   * @group Iterating
+   */
   arrayChunks<N extends number>(size: N) {
     return new RustIterator(arrayChunks<Item, N>(this, size))
   }
@@ -244,8 +256,17 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return new RustIterator(map(this, functor))
   }
 
-  filter(f: (val: Item) => boolean): RustIterator<Item> {
-    return new RustIterator(filter(this, f))
+  /**
+   * Will yield only those items for which the {@linkcode predicate} returns `true`.
+   *
+   * @see `Array.filter`
+   *
+   * @param predicate - Function to check each value with
+   *
+   * @group Iterating
+   */
+  filter(predicate: (val: Item) => boolean): RustIterator<Item> {
+    return new RustIterator(filter(this, predicate))
   }
 
   /**
@@ -257,18 +278,47 @@ export class RustIterator<Item> implements IterableIterator<Item> {
    *
    * @group Consuming
    */
-  forEach(functor: (val: Item) => void): void {
+  forEach(functor: (item: Item) => void): void {
     forEach(this, functor)
   }
 
+  /**
+   * Will yield only the first `n` values
+   *
+   * @remarks
+   * If the upstream iterator yields less than `n` items, then all of them will be yielded and the iterator will be fused.
+   *
+   * @param n - The maximum number of items to yield
+   *
+   * @group Iterating
+   */
   take(n: number): RustIterator<Item> {
     return new RustIterator(take(this, n))
   }
 
-  takeWhile(f: (val: Item) => boolean): RustIterator<Item> {
-    return new RustIterator(takeWhile(this, f))
+  /**
+   * Will yield items only until an item fails the {@linkcode predicate}.
+   *
+   * @remarks
+   * If the upstream iterator yields only items that pass the predicate, then all items will be yeilded and the iterator fused.
+   *
+   * Will not yield the first value that returns falsy, but it will consume that value from the upstream Iterator.
+   *
+   * @param predicate - The function to check values with.
+   *
+   * @group Iterating
+   */
+  takeWhile(predicate: (item: Item) => boolean): RustIterator<Item> {
+    return new RustIterator(takeWhile(this, predicate))
   }
 
+  /**
+   * Will yield only ever nth value from the upstream Iterator.
+   *
+   * @param n - number indicating that the iterator should yeild every `nth` Item
+   *
+   * @group Iterating
+   */
   stepBy(n: number): RustIterator<Item> {
     return new RustIterator(stepBy(this, n))
   }
@@ -281,30 +331,111 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return new RustIterator(zip(this, other))
   }
 
+  /**
+   * Will yield tuples of the 0-index and the value.
+   *
+   * @remarks
+   * This is useful for having access to the index like is available in the Array methods
+   *
+   * @group Iterating
+   */
   enumerate(): RustIterator<[number, Item]> {
     return new RustIterator(enumerate(this))
   }
 
+  /**
+   * Yields every value as is, but first passes the value to fn.
+   *
+   * @remarks
+   * This allows accessing the value, primarily for debugging purposes, expressively in the method chain.
+   *
+   * The most simple use is with console.log
+   *
+   * Function will only be called when the iterator is consumed.
+   *
+   * @param fn - A function that will be called with each value of the `Iterator`
+   *
+   * @example
+   * iter.inspect(console.log)
+   *     .filter(Boolean)
+   *     .inspect(console.log)
+   *     .collect();
+   *
+   * @group Iterating
+   */
   inspect(fn: (val: Item) => void): RustIterator<Item> {
     return new RustIterator(inspect(this, fn))
   }
 
-  scan<A = Item, R = Item>(
-    fn: (state: [A], val: Item) => R,
-    initial: A,
-  ): RustIterator<R> {
-    return new RustIterator(scan(this, fn, initial))
+  /**
+   * Yields the result of passing the value to fn.
+   *
+   * {@linkcode functor} is also passed a tuple of initial as the starting state, and continues to pass that same state as an argument to each calling of fn.
+   *
+   * @remarks
+   * When you mutate state, this allows you to iterate while maintaining some kind of internal "memory" to the iteration, so it can have some sense of the past.
+   *
+   * @param functor - Functor to which each value will be passed
+   * @param initial - An initial value for the internal state
+   *
+   * @group Iterating
+   */
+  scan<State = Item, Return = Item>(
+    functor: (state: [State], val: Item) => Return,
+    initial: State,
+  ): RustIterator<Return> {
+    return new RustIterator(scan(this, functor, initial))
   }
 
+  /**
+   * Yields the individual values yielded by flattening the value (where T = Iterable) depth number of times.
+   *
+   * @see `Array.flat`
+   *
+   * @remarks
+   * This can allow multiple Iterable to be combined, to iteratively iterate over each successive Iterable.
+   *
+   * For this purpose, only Iterable objects will be flattened. string, while Iterable, will not be flattened into individual characters or codepoint.
+   *
+   * @param depth - The number of times to flatten the `Iterable`
+   *
+   * @group Iterating
+   */
   flat<D extends depth = 1>(depth?: D) {
     return new RustIterator(flat<Item, D>(this, depth))
   }
-  flatMap<S>(mapper: (val: Item) => S) {
-    return new RustIterator(flatMap(this, mapper))
+
+  /**
+   * Yields the individual items yielded by flattening the result of calling mapper with the value. This will only flatten a single level.
+   *
+   * @see `Array.flatMap`
+   * This is similar to separately calling `.map.flat` with a depth of 1.
+   *
+   * For this purpose, only Iterable objects will be flattened. string, while Iterable, will not be flattened into individual characters or codepoint
+   *
+   * @param functor - A function that will be called with each item of the `Iterator`, returning an `Iterable`
+   *
+   * @group Iterating
+   */
+  flatMap<S>(functor: (item: Item) => S) {
+    return new RustIterator(flatMap(this, functor))
   }
 
-  window<S extends number>(n: S) {
-    return new RustIterator(window<Item, S>(this, n))
+  /**
+   * Yields tuples of n size containing a rolling window of values.
+   * Each subsequent yielded value will be the same as the previous, except with the head value removed, and a new value added at the tail.
+   *
+   * @remarks
+   * No window will be yielded until n values are consumed, even if the Iterator becomes done before then.
+   *
+   *  Similarly, once the Iterator is done, no more values will be yielded. This means each window yielded will be `n` size, each time, every time.
+   *
+   * @param n - The size of the window
+   *
+   * @group Iterating
+   */
+  window<Size extends number>(n: Size) {
+    return new RustIterator(window<Item, Size>(this, n))
   }
 
   cycle(): RustIterator<Item> {
