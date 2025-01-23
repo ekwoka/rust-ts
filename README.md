@@ -640,7 +640,7 @@ Individually yields all the values of the upstream `Iterator` in reverse order.
 
 To accomplish this, the upstream `Iterator` is completely consumed and stored in memory, immediately upon calling this method, even if the returned `RustIterator` has no yet yielded any values.
 
-> The values in memory are not stored in reverse order, instead the values are yielded from the tail to the front.
+> The values in memory are not stored in reverse order, instead the values are yielded from the tail to the head.
 
 ## `VecDequeue`/`CircularBuffer`
 
