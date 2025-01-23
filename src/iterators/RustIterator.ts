@@ -323,11 +323,29 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return new RustIterator(stepBy(this, n))
   }
 
+  /**
+   * Individually yields all the values of {@linkcode other} AFTER consuming all of the upstream `Iterator`.
+   * @param other - Iterable to yield after the current
+   *
+   * @group Special
+   */
   chain(other: Iterable<Item>): RustIterator<Item> {
     return new RustIterator(chain(this, other))
   }
 
-  zip<S = Item>(other: Iterable<S>): RustIterator<[Item, S]> {
+  /**
+   * Successively yields a tuple of the next values of both the upstream `Iterator` and `other`.
+   *
+   * @remarks
+   * This is useful for merging values together as pairs automatically.
+   *
+   * If the Iterables are not of the same length, values will be yielded until the shortest Iterable is consumed.
+   *
+   * @param other - Iterable to zip with the current
+   *
+   * @group Special
+   */
+  zip<Other = Item>(other: Iterable<Other>): RustIterator<[Item, Other]> {
     return new RustIterator(zip(this, other))
   }
 
@@ -438,6 +456,16 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return new RustIterator(window<Item, Size>(this, n))
   }
 
+  /**
+   * Repeatedly yields each individual value of the upstream `Iterator` forever, resulting in an `Iterator` that can never be `done`.
+   *
+   * @remarks
+   *  As this requires storing all yielded values in memory, for large datasets, this means a lot of memory.
+   *
+   * As the returned `Iterator` can NEVER end, `Consuming` methods could result in a blocked thread, if there have not been additional methods that limit the length of the `Iterator` (like {@linkcode take}, {@linkcode takeWhile}, {@linkcode find}) that will eventually fuse the `Iterator`.
+   *
+   * @group Special
+   */
   cycle(): RustIterator<Item> {
     return new RustIterator(cycle(this))
   }
@@ -597,8 +625,48 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return this.reduce((acc, item) => (item < acc ? item : acc))
   }
 
-  sort(compare?: (a: Item, b: Item) => number) {
-    return new RustIterator(sort(this, compare))
+  /**
+   * Yields each value of the upstream `Iterator`, after sorting the values through `compare`.
+   *
+   * @see `Array.sort`
+   *
+   * @remarks
+   * By default this uses a `lexigraphicCompare` sort when no {@linkcode comparator} is passed. This emulates the native behavior of `Array.sort`, although mixed arrays of `number | string` can have strange results, as this will not turn all `number` to `string` when sorting.
+   *
+   * It is recommended to provide your own `compare` any time you have values that are not strictly `number | bigint`.
+   *
+   * To accomplish sorting, the upstream `Iterator` is completely consumed and stored in memory, immediately upon calling this method, even if the returned {@linkcode RustIterator} has not yielded any values.
+   *
+   * To reduce the total work performed, and iteratively sort the values, a Bubble Sort algorithm is used.
+   *
+   * When the resulting `Iterator` yields a value, the first value bubbles through being compared to each remaining value, being swapped as needed. When this process is done, the value is yielded.
+   *
+   * As values are yielded, the internal storage of values is reduced in memory.
+   *
+   * While Bubble Sort can increase total comparisons when needing to sort the entire list, it works nicely for this use case, as it doesn't prematurely sort any sub arrays while producing the next value.
+   * This is ideal for the purpose of an `Iterator` where you do as little work as possible until it is finally needed, and where not all values will actually need to be sorted, as in the example.
+   *
+   * @example
+   * ```ts
+   * const lowestThreePrices = prices
+   *    .sort()
+   *    .take(3)
+   *    .collect();
+   * ```
+   *
+   * While this will `collect` all of the `prices`, it will only sort out the lowest three values, discarding the remaining unsorted values.
+   *
+   * @remarks
+   * Due to the naive nature of the sorting implementation, this sort is NOT stable, ie. the order of like values (those that when compared with `compare` return `0`) is not preserved from the original order.
+   *
+   * In fact, they will almost always be reversed. Maybe that's something to fix....in the future...
+   *
+   * @param comparator - functor to compare two values
+   *
+   * @group Special
+   */
+  sort(comparator?: (a: Item, b: Item) => number) {
+    return new RustIterator(sort(this, comparator))
   }
 
   /**
@@ -628,17 +696,48 @@ export class RustIterator<Item> implements IterableIterator<Item> {
   findIndex(predicate: (item: Item) => boolean): number | null {
     return this.position(predicate)
   }
+
+  /**
+   *
+   * Individually yields all the values of the upstream `Iterator` in reverse order.
+   *
+   * @see `Array.reverse`
+   *
+   * @remarks To accomplish this, the upstream `Iterator` is completely consumed and stored in memory, immediately upon calling this method, even if the returned {@linkcode RustIterator} has not yet yielded any values.
+   *
+   * The values in memory are not stored in reverse order, instead the values are yielded from the tail to the head.
+   *
+   * @group Special
+   */
   reverse() {
     return new RustIterator(reverse(this))
   }
 }
 
-export class PeekableRustIterator<T> extends RustIterator<T> {
-  peeked: IteratorResult<T> | undefined
-  peek(): IteratorResult<T> {
+export class PeekableRustIterator<Item> extends RustIterator<Item> {
+  /**
+   * If the `Iterator` is currently in the state of having been `peeked` at ({@linkcode peek} has been called since the last time {@linkcode next} was called), this will return that `IteratorResult`, otherwise `undefined`.
+   *
+   * @remarks
+   * This is primarily internal for handling the `peeked` value.
+   */
+  peeked: IteratorResult<Item> | undefined
+
+  /**
+   * Returns the `IteratorResult` that will next be yielded when calling {@linkcode next}. This can allow the developer to check the next value, and change course, without consuming the value in the `Iterator`.
+   *
+   * @remarks
+   * Due to how `Iterator` work, this WILL consume the next value from the upstream `Iterator` as that value will need to be consumed to inspect it.
+   *
+   * If you split iterators out and consume them in different places strategically, this will block that value from being able to be yielded by other consumers of that `Iterator`.
+   *
+   * That value is stored internally and will be returned the next time `next` is called.
+   */
+  peek(): IteratorResult<Item> {
     if (!this.peeked) this.peeked = this.next()
     return this.peeked
   }
+
   next() {
     if (this.peeked) {
       const peeked = this.peeked
@@ -647,10 +746,22 @@ export class PeekableRustIterator<T> extends RustIterator<T> {
     }
     return super.next()
   }
-  peekable(): PeekableRustIterator<T> {
+
+  peekable(): PeekableRustIterator<Item> {
     return this
   }
-  takeWhilePeek(f: (val: T) => boolean): RustIterator<T> {
-    return new RustIterator(takeWhilePeek(this, f))
+
+  /**
+   * Will yield values until the predicate returns `false`, but will do so while peeking at the next value.
+   *
+   * @remarks
+   * This differs from {@linkcode takeWhile} in that the first value to return false from the `predicate` will still be available on this iterator
+   *
+   * @see {@linkcode takeWhile}
+   *
+   * @group Iterating
+   */
+  takeWhilePeek(predicate: (val: Item) => boolean): RustIterator<Item> {
+    return new RustIterator(takeWhilePeek(this, predicate))
   }
 }
