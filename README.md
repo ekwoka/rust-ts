@@ -591,7 +591,7 @@ These methods don't cleanly fit into the above groups of methods. At this time, 
 
 Individually yields all the values of `other` AFTER consuming all of the upstream `Iterator`.
 
-#### `zip<S = T>(other: Iterable\<S\>): RustIterator<[T, S]`
+#### `zip<S = T>(other: Iterable\<S\>): RustIterator<[T, S]>`
 
 Successively yields a tuple of the next values of both the upstream `Iterator` and `other`.
 
@@ -771,19 +771,21 @@ const array = new VecDequeue();
 for (let i = 0; i < 100; i++) array.push(i);
 ```
 
+### Constructor
+
+#### `new VecDequeue<Item>(initializer: Array<Item> | number = 0)`
+
+Creates a new `VecDequeue` instance.
+
+When the `initializer` is an `Array`, The `Vec` buffer is initialized with the values from the array.
+
+When the `initializer` is a `number` (or nothing, defaulting to `0`), The `Vec` buffer is initialized to a size of the max of `1` or the number.
+
+> `CircularBuffer` is an alias of `VecDequeue`, so it shares the same constructor signature.
+
 ### Instance Methods
 
 The goal for this API, though not quite there now, is to implement the whole `Array` interface, as well as a few of the useful methods of the `VecDequeue` struct from Rust. When the two have differently named methods that do the same thing, the primary name is the `Array` method, though many will be aliased with a camelcase version of the Rust name.
-
-#### `new VecDequeue<T>(initializer: Array<T> | number = 0)`
-
-#### `new CircularBuffer<T>(initializer: Array<T> | number = 0)`
-
-The class is exported under both `VecDequeue` and `CircularBuffer` for convenience. It's the exact same thing.
-
-When the `initializer` is an `Array`, the `Vec` buffer is initialized to the size of that array, the values are copied into the `Vec` buffer.
-
-When the `initializer` is a `number` (or nothing, defaulting to `0`), The `Vec` buffer is initialized to a size of the max of `1` or the number.
 
 #### `at(i: number): Item | undefined`
 
@@ -853,13 +855,13 @@ Returns a `RustIterator` with the `Vec` as the upstream `Iterator`.
 
 ### Static Methods
 
-#### `static from<T>(arr: Array<T>): VecDequeue<T>`
+#### `from<T>(arr: Array<T>): VecDequeue<T>`
 
 > See `Array.from`
 
 Creates a `VecDequeue` from an `Array`
 
-#### `static from<T>(opt: { length: number }, functor?: (v: number, i: number) => T): VecDequeue<T>`
+#### `from<T>(opt: { length: number }, functor?: (v: number, i: number) => T): VecDequeue<T>`
 
 > See `Array.from`
 
