@@ -5,8 +5,18 @@
 import { RustIterator } from '../iterators/index.js'
 
 /**
- * A double-ended queue implementation using a growable ring buffer.
- * Allows efficient insertion and removal of elements at both ends.
+ * A double-ended queue implementation using a growable ring buffer (circular buffer).
+ * Provides efficient insertion and removal at both ends of the collection.
+ *
+ * Unlike a standard Array where operations at the start of the collection require
+ * shifting all elements, VecDequeue uses a circular buffer approach. This means
+ * push/pop (at end) and shift/unshift (at start) operations are all O(1) when
+ * there is capacity available.
+ *
+ * When the buffer needs to grow, it doubles in size and only then moves elements
+ * to maintain contiguous storage. This amortizes the cost of growing the buffer
+ * over many operations.
+ *
  * Also available as {@linkcode CircularBuffer} to better express intent
  * when using this data structure primarily as a circular buffer.
  *
