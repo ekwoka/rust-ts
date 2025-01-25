@@ -1,12 +1,69 @@
+/**
+ * @module
+ * @mergeModuleWith VecDequeue
+ */
 import { RustIterator } from '../iterators/index.js'
 
-export class VecDequeue<T> {
+/**
+ * A double-ended queue implementation using a growable ring buffer (circular buffer).
+ * Provides efficient insertion and removal at both ends of the collection.
+ *
+ * Unlike a standard Array where operations at the start of the collection require
+ * shifting all elements, VecDequeue uses a circular buffer approach. This means
+ * push/pop (at end) and shift/unshift (at start) operations are all O(1) when
+ * there is capacity available.
+ *
+ * When the buffer needs to grow, it doubles in size and only then moves elements
+ * to maintain contiguous storage. This amortizes the cost of growing the buffer
+ * over many operations.
+ *
+ * Also available as {@linkcode CircularBuffer} to better express intent
+ * when using this data structure primarily as a circular buffer.
+ *
+ * @template Item - The type of elements stored in the deque
+ *
+ * @groupDescription Array Properties
+ * Properties that mirror those found on the native JavaScript Array class
+ *
+ * @groupDescription Array Methods
+ * Methods that provide functionality equivalent to native JavaScript Array methods
+ */
+export class VecDequeue<Item> {
+  /**
+   * Current number of elements in the deque
+   *
+   * @group Array Properties
+   */
   length: number = 0
-  buffer: T[]
+
+  /**
+   * Internal buffer storing the elements
+   */
+  buffer: Item[]
+
+  /**
+   * Index of the first element
+   */
   head: number = 0
+
+  /**
+   * Index where the next element will be inserted
+   */
   tail: number = 0
+
+  /**
+   * Total capacity of the buffer
+   */
   size: number = 0
-  constructor(initializer: Array<T> | number = 0) {
+
+  /**
+   * Creates a new VecDequeue instance
+   *
+   * @param initializer - Either an initial array of elements or the initial capacity
+   *
+   * @template Item - The type of elements to be stored in the deque
+   */
+  constructor(initializer: Array<Item> | number = 0) {
     if (typeof initializer === 'number') {
       this.buffer = new Array(initializer)
       this.size = Math.max(1, initializer)
@@ -16,86 +73,174 @@ export class VecDequeue<T> {
       this.tail = 0
     }
   }
-  at(i: number) {
-    const idx = (i + this.size) % this.size
+
+  /**
+   * Gets the element at the specified index, handling negative indices by wrapping around
+   *
+   * @param index - Index of the element (can be negative)
+   *
+   * @group Array Methods
+   */
+  at(index: number): Item | undefined {
+    const idx = (index + this.size) % this.size
     if (idx < 0 || idx > this.length) return undefined
     return this.buffer[(this.head + idx) % this.size]
   }
-  get(i: number) {
-    if (i < 0 || i > this.length) return undefined
-    return this.buffer[(this.head + i) % this.size]
+
+  /**
+   * Gets the element at the specified index
+   *
+   * @param index - Index of the element
+   */
+  get(index: number): Item | undefined {
+    if (index < 0 || index > this.length) return undefined
+    return this.buffer[(this.head + index) % this.size]
   }
-  set(i: number, v: T) {
-    if (i < 0 || i > this.length) return
-    this.buffer[(this.head + i) % this.size] = v
+
+  /**
+   * Sets the element at the specified index
+   *
+   * @param index - Index to set
+   * @param value - Value to set at the index
+   */
+  set(index: number, value: Item): void {
+    if (index < 0 || index > this.length) return
+    this.buffer[(this.head + index) % this.size] = value
   }
-  push(v: T) {
+
+  /**
+   * Adds an element to the end of the deque
+   *
+   * @param value - Element to add
+   *
+   * @group Array Methods
+   */
+  push(value: Item): void {
     this.grow()
-    this.buffer[this.tail] = v
+    this.buffer[this.tail] = value
     this.tail = (this.tail + 1) % this.size
     this.length++
   }
-  pop() {
+
+  /**
+   * Removes and returns the last element from the deque
+   *
+   * @group Array Methods
+   */
+  pop(): Item | undefined {
     this.tail = this.tail ? this.tail - 1 : this.size - 1
     const v = this.buffer[this.tail]
-    this.buffer[this.tail] = undefined as unknown as T
+    this.buffer[this.tail] = undefined as unknown as Item
     this.length--
     return v
   }
-  unshift(v: T) {
+
+  /**
+   * Adds an element to the beginning of the deque
+   *
+   * @param value - Element to add
+   *
+   * @group Array Methods
+   */
+  unshift(value: Item): void {
     this.grow()
     this.head = this.head ? this.head - 1 : this.size - 1
-    this.buffer[this.head] = v
+    this.buffer[this.head] = value
     this.length++
   }
-  shift() {
+
+  /**
+   * Removes and returns the first element from the deque
+   *
+   * @group Array Methods
+   */
+  shift(): Item | undefined {
     const v = this.buffer[this.head]
-    this.buffer[this.head] = undefined as unknown as T
+    this.buffer[this.head] = undefined as unknown as Item
     this.head = (this.head + 1) % this.size
     this.length--
     return v
   }
-  first() {
+
+  /**
+   * Returns the first element in the deque without removing it
+   */
+  first(): Item {
     return this.buffer[this.head]
   }
-  last() {
+
+  /**
+   * Returns the last element in the deque without removing it
+   */
+  last(): Item {
     return this.buffer[this.tail ? this.tail - 1 : this.size - 1]
   }
-  grow() {
+
+  /**
+   * Grows the internal buffer when it reaches capacity
+   *
+   * @internal
+   */
+  grow(): void {
     if (this.length < this.size) return
     this.buffer.length *= 2
     const newSpaceStart = this.size
     for (let i = 0; i < this.tail; i++) {
       this.buffer[newSpaceStart + i] = this.buffer[i]
-      this.buffer[i] = undefined as unknown as T
+      this.buffer[i] = undefined as unknown as Item
     }
     this.size = this.buffer.length
     this.tail += newSpaceStart
   }
-  [Symbol.iterator]() {
+
+  /**
+   * Makes the deque iterable
+   *
+   * @group Array Methods
+   */
+  [Symbol.iterator](): Iterator<Item> {
     return circularIterable(this)
   }
-  toIter() {
+
+  /**
+   * Creates a RustIterator for this deque
+   */
+  toIter(): RustIterator<Item> {
     return new RustIterator(this)
   }
 
+  /**
+   * Creates a new VecDequeue from an array or a length with a mapping function
+   *
+   * @param arr - Source array or object with length property
+   * @param functor - Optional function to map indices to values
+   *
+   * @group Array Methods
+   */
   static from<T>(arr: Array<T>): VecDequeue<T>
   static from<T>(
     opt: { length: number },
-    mapper?: (v: number, i: number) => T,
+    functor?: (v: number, i: number) => T,
   ): VecDequeue<T>
+
   static from<T>(
     optArr: { length: number } | Array<T>,
-    mapper?: (v: number, i: number) => T,
+    functor?: (v: number, i: number) => T,
   ): VecDequeue<T> {
     const buff = Array.isArray(optArr)
       ? optArr
-      : Array.from(optArr, (_, i) => mapper?.(i, i) ?? (undefined as T))
+      : Array.from(optArr, (_, i) => functor?.(i, i) ?? (undefined as T))
     return new VecDequeue<T>(buff)
   }
 }
 
-function* circularIterable<T>(d: VecDequeue<T>) {
+/**
+ * Creates an iterator for the VecDequeue that yields elements in order
+ *
+ * @internal
+ * @param d - The VecDequeue to iterate over
+ */
+function* circularIterable<T>(d: VecDequeue<T>): Generator<T> {
   for (let i = 0; i < d.length; i++) {
     yield d.buffer[(d.head + i) % d.size]
   }
