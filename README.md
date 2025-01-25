@@ -591,7 +591,7 @@ These methods don't cleanly fit into the above groups of methods. At this time, 
 
 Individually yields all the values of `other` AFTER consuming all of the upstream `Iterator`.
 
-#### `zip<S = T>(other: Iterable\<S\>): RustIterator<[T, S]>
+#### `zip<S = T>(other: Iterable\<S\>): RustIterator<[T, S]`
 
 Successively yields a tuple of the next values of both the upstream `Iterator` and `other`.
 
@@ -785,55 +785,55 @@ When the `initializer` is an `Array`, the `Vec` buffer is initialized to the siz
 
 When the `initializer` is a `number` (or nothing, defaulting to `0`), The `Vec` buffer is initialized to a size of the max of `1` or the number.
 
-#### `at(i: number): T`
+#### `at(i: number): Item | undefined`
 
 Returns the value at `i` index.
 
 > This is not the index within the internal buffer, but the 0-index from the head as it wraps around the circular buffer
 
-#### `get(i: number): T`
+#### `get(i: number): Item | undefined`
 
 > Alias of `at`
 
-#### `set(i: number, v: T): void`
+#### `set(i: number, v: Item): void`
 
 Sets a value to the `i` index.
 
-#### `push(v: T): void`
+#### `push(value: Item): void`
 
 > See `Array.push`
 
 Pushes a value into the `Vec` at the tail.
 
-This operation, performs a size check (by calling `grow`) before adding the value, in the event the buffer is full.
+This operation performs a size check (by calling `grow`) before adding the value, in the event the buffer is full.
 
-#### `pop(): T | undefined`
+#### `pop(): Item | undefined`
 
 > See `Array.pop`
 
 Returns the value at the tail of the `Vec` removing it from the `Vec`, or `undefined` if none exists.
 
-#### `unshift(v: T): void
+#### `unshift(value: Item): void`
 
 > See `Array.unshift`
 
 Inserts a value to the `Vec` at the head.
 
-This operation, performs a size check (by calling `grow`) before adding the value, in the event the buffer is full.
+This operation performs a size check (by calling `grow`) before adding the value, in the event the buffer is full.
 
-#### `shift(): T | undefined`
+#### `shift(): Item | undefined`
 
 > See `Array.shift`
 
 Returns the value at the head of the `Vec` removing it from the `Vec`, or `undefined` if none exists.
 
-#### `first(): T | undefined`
+#### `first(): Item`
 
-Returns the value at the head of the `Vec`, or `undefined` if none exists.
+Returns the value at the head of the `Vec`.
 
-#### `last(): T | undefined`
+#### `last(): Item`
 
-Returns the value at the tail of the `Vec`, or `undefined` if none exists.
+Returns the value at the tail of the `Vec`.
 
 #### `grow(): void`
 
@@ -841,29 +841,29 @@ Returns the value at the tail of the `Vec`, or `undefined` if none exists.
 
 Checks if the buffer is full. If so, increases the buffer size by 100%, and moves any wrapped tail elements into the extended memory space.
 
-#### `[@@iterator](): Iterator<T>`
+#### `[Symbol.iterator](): Iterator<Item>`
 
 Returns an `Iterator` over the items in the `Vec`, appropriately wrapping around the circular buffer.
 
 Despite how the circular buffer, works, this has similar semantics to iterating over an array, in regards to if items are added and removed in the process. If you remove an item early in the list, the `Iterator` will appear to skip an item in its iteration.
 
-#### `toIter(): RustIterator<T>`
+#### `toIter(): RustIterator<Item>`
 
 Returns a `RustIterator` with the `Vec` as the upstream `Iterator`.
 
 ### Static Methods
 
-#### `from<T>(arr: Array<T>): VecDequeue<T>`
+#### `static from<T>(arr: Array<T>): VecDequeue<T>`
 
 > See `Array.from`
 
 Creates a `VecDequeue` from an `Array`
 
-#### `from<T>(opt: { length: number }, mapper?: (v: number, i: number) => T): VecDequeue<T>
+#### `static from<T>(opt: { length: number }, functor?: (v: number, i: number) => T): VecDequeue<T>`
 
 > See `Array.from`
 
-Creates a `VecDequeue` of `opt.length` size by passing the 0-index into `mapper` for each item in the size.
+Creates a `VecDequeue` of `opt.length` size by passing the 0-index into `functor` for each item in the size.
 
 ## `Prelude`
 
