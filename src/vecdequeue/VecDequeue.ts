@@ -1,8 +1,14 @@
+/**
+ * @module
+ * @mergeModuleWith VecDequeue
+ */
 import { RustIterator } from '../iterators/index.js'
 
 /**
  * A double-ended queue implementation using a growable ring buffer.
  * Allows efficient insertion and removal of elements at both ends.
+ * Also available as {@linkcode CircularBuffer} to better express intent
+ * when using this data structure primarily as a circular buffer.
  *
  * @template Item - The type of elements stored in the deque
  *
