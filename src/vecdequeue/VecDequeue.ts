@@ -50,6 +50,8 @@ export class VecDequeue<Item> {
    * Creates a new VecDequeue instance
    *
    * @param initializer - Either an initial array of elements or the initial capacity
+   *
+   * @template Item - The type of elements to be stored in the deque
    */
   constructor(initializer: Array<Item> | number = 0) {
     if (typeof initializer === 'number') {
