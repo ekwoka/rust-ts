@@ -1,7 +1,24 @@
+/**
+ * This module contains code that can attach additional behaviors to the JavaScript Standard Library.
+ *
+ * Currently, this fills in `iter` methods for Arrays, Strings, Sets, Maps, Generators, and Iterators.
+ *
+ * This allows you to easily take advantage of the Rust-like iterator methods provided by the `RustIterator` class, without the clunky class instantiation.
+ *
+ * @module Prelude
+ *
+ * @example
+ * import '@ekwoka/rust-ts/prelude';
+ *
+ * [1, 2, 3].iter().map(x => x * 2).collect(); // [2, 4, 6]
+ */
+
 import { RustIterator } from './iterators'
+
 const iter = function <T>(this: Iterable<T>) {
   return new RustIterator(this)
 }
+
 Array.prototype.iter = iter
 String.prototype.iter = iter
 Set.prototype.iter = iter
@@ -22,32 +39,28 @@ Object.getPrototypeOf(Generator.prototype).iter = iter
 declare global {
   interface Array<T> {
     /**
-     * Create a RustIterator from an Array.
-     * @returns {RustIterator<T>}
+     * Create a {@linkcode RustIterator} from an Array.
      */
     iter(): RustIterator<T>
   }
 
   interface String {
     /**
-     * Create a RustIterator over each character of a String.
-     * @returns {RustIterator<string>}
+     * Create a {@linkcode RustIterator} over each character of a String.
      */
     iter(): RustIterator<string>
   }
 
   interface Set<T> {
     /**
-     * Create a RustIterator from a Set.
-     * @returns {RustIterator<T>}
+     * Create a {@linkcode RustIterator} from a Set.
      */
     iter(): RustIterator<T>
   }
 
   interface Map<K, V> {
     /**
-     * Create a RustIterator from a Map.
-     * @returns {RustIterator<[K, V]>}
+     * Create a {@linkcode RustIterator} from a Map.
      */
     iter(): RustIterator<[K, V]>
   }
@@ -55,16 +68,14 @@ declare global {
   // biome-ignore lint/correctness/noUnusedVariables: Necessary for Extension
   interface Generator<T, TReturn, TNext> {
     /**
-     * Create a RustIterator from a Generator.
-     * @returns {RustIterator<T>}
+     * Create a {@linkcode RustIterator} from a Generator.
      */
     iter(): RustIterator<T>
   }
 
   interface Iterator<T> {
     /**
-     * Create a RustIterator from an Iterator.
-     * @returns {RustIterator<T>}
+     * Create a {@linkcode RustIterator} from an Iterator.
      */
     iter(): RustIterator<T>
   }
