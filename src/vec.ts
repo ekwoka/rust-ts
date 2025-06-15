@@ -188,16 +188,44 @@ export interface Vector<N extends number> {
    */
   midPoint(rhs: Vector<N>): Vector<N>
 
+  /**
+   * Returns a new Vec that is the current Vec moved towards another Vec by a certain distance
+   * @remarks functionally equivalent to `a.add(b.sub(a).normalize().scale(distance))`
+   * @group Math
+   */
   moveTowards(rhs: Vector<N>, distance: number): Vector<N>
   lerp(rhs: Vector<N>, t: number): Vector<N>
 
+  /**
+   * Returns an iterator over the points between the current Vec and another Vec
+   *
+   * @group Math
+   */
   between(
     rhs: Vector<N>,
     incStart: boolean,
     incEnd: boolean,
   ): IterableIterator<Vector<N>>
+
+  /**
+   * Returns an array representation of the current Vec
+   *
+   * @group To
+   */
   toArray(): number[]
+
+  /**
+   * Returns a string representation of the current Vec
+   *
+   * @group To
+   */
   toString(): string
+
+  /**
+   * Returns an iterator over the parts of the current Vec
+   *
+   * @group To
+   */
   toIter(): RustIterator<number>
 }
 
