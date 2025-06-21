@@ -117,6 +117,16 @@ export class RustIterator<Item> implements IterableIterator<Item> {
     return new PeekableRustIterator(this)
   }
 
+  /**
+   * Returns the next `n` values yielded by the `Iterator` as an array.
+   *
+   * @remarks
+   * If the `Iterator` becomes `done` before yielding `n` values, the returned array will contain all of the yielded values and the `done` property will be set to `true`.
+   *
+   * @param n - The number of items to yield
+   *
+   * @group Consuming
+   */
   nextChunk(n: number): { value: Item[]; done: boolean } {
     const chunk = []
     for (let i = 0; i < n; i++) {
